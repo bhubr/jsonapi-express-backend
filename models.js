@@ -35,7 +35,7 @@ var User = sequelize.define('user', {
 User.beforeCreate = function(attributes) {
   return new Promise((resolve, reject) => {
     return bcrypt.genSaltAsync(SALT_WORK_FACTOR)
-    .then(salt => bcrypt.hash(attributes.password, salt))
+    .then(salt => bcrypt.hashAsync(attributes.password, salt))
     .then(hash => {
       console.log('hash', attributes.password, '=>', hash);
       resolve(Object.assign(attributes, { password: hash }));

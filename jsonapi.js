@@ -62,7 +62,7 @@ function mapRecordToPayload( record, type, attributes ) {
 }
 
 function processAttributes( attributes, doCreate ) {
-  let updatedAt = new Date().toMysqlFormat();
+  // let updatedAt = new Date().toMysqlFormat();
   let outputAttrs = Object.assign( {},
     utils.lowerCamelAttributes( attributes )
     // { updatedAt }
@@ -82,8 +82,8 @@ function updateResource( req, res ) {
   const attributes = req.body.data.attributes;
   const snakedAttrs = Object.assign( {},
     utils.lowerCamelAttributes(attributes), {
-      createdAt: new Date().toMysqlFormat(),
-      updatedAt: new Date().toMysqlFormat()
+      // createdAt: new Date().toMysqlFormat(),
+      // updatedAt: new Date().toMysqlFormat()
   } );
   const item = new global[objType](snakedAttrs);
 

@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  </head>
+  <body>
+    <form action="">
+      <input name="email" />
+      <input name="password" />
+      <input type="submit" value="go" />
+    </form>
+    <script>
+    (function($) {
+      $(document).ready(() => {
+        $("form").on("submit", e => {
+          e.preventDefault();
+          const attributes = {
+            email: $('input[name="email"]').val(),
+            password: $('input[name="password"]').val()
+          };
+          const data = JSON.stringify({ data: { type: "users", attributes }});
+          $.ajax({
+            type: "POST",
+            url: "/api/v1/users",
+            data,
+            success: data => { console.log(data); },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json"
+          });
+        });
+      });
+    })(jQuery);
+    </script>
+  </body>
+</html>
