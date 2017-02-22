@@ -28,10 +28,10 @@ function kebabAttributes(attributes) {
 }
 
 function mapRecords(records, type) {
-  return _.map(records.models, model => {
-    const id = model.attributes.id;
-    delete model.attributes.id;
-    const attributes = kebabAttributes(model.attributes);
+  return _.map(records, model => {
+    const id = model.dataValues.id;
+    delete model.dataValues.id;
+    const attributes = kebabAttributes(model.dataValues);
     return Object.assign({}, { id, type }, { attributes });
   });
 }

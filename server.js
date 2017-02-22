@@ -10,7 +10,7 @@ var port = process.argv.length >= 3 ? parseInt( process.argv[2], 10 ) : 3001;
 
 var passport = require('passport'),
   LocalStrategy = require('passport-local').Strategy;
-var { User } = require('./models');
+var { User, AuthToken } = require('./models');
 var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var session = require('express-session');
@@ -87,10 +87,13 @@ app.post('/auth/signin', (req, res) => {
             req.session.user.permissions.push(permission);
           })
         });
+        return req.session.user.permissions;
+      })
+      .then(permissions => AuthToken.generate(user, permissions))
+      .then(token => {
         delete req.session.user.password;
-        console.log(req.session);
-        return res.jsonApi(req.session.user);
-
+        console.log(req.session, token);
+        return res.jsonApi({ id: req.session.user.id, token: token.value });
       });
     })
   })

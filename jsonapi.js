@@ -29,6 +29,16 @@ router.get('/:table', (req, res) => {
   .then(res.jsonApi);
 });
 
+router.get('/:table/:id', (req, res) => {
+  const table = req.params.table;
+  const id = parseInt(req.params.id, 10);
+  const objType = _.titleize( _.singularize( table ) );
+  models[objType].findAll({ where: { id } })
+  .then(records => utils.mapRecords(records, table))
+  .then(mapped => (mapped[0]))
+  .then(res.jsonApi);
+});
+
 // define the home page route
 router.post('/:type', (req, res) => {
   const type = req.params.type;
