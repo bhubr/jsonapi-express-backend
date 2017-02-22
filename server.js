@@ -77,10 +77,21 @@ app.post('/auth/signin', (req, res) => {
     }
     bcrypt.compareAsync(user.dataValues.password, password)
     .then(result => {
-      req.session.user = user.dataValues;
-      delete req.session.user.password;
-      console.log(req.session);
-      return res.jsonApi(req.session.user);
+      console.log(user);
+      req.session.user = Object.assign({ permissions: [] }, user.dataValues);
+      user.getRoles()
+      .then(roles => Promise.map(roles, role => (role.getPermissions())))
+      .then(rolesPermissions => {
+        rolesPermissions.forEach(rolePermissions => {
+          rolePermissions.forEach(permission => {
+            req.session.user.permissions.push(permission);
+          })
+        });
+        delete req.session.user.password;
+        console.log(req.session);
+        return res.jsonApi(req.session.user);
+
+      });
     })
   })
   .catch(err => {
