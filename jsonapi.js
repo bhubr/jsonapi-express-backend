@@ -38,6 +38,7 @@ router.post('/:type', (req, res) => {
   const Model = models[objType];
   // Model.create(processedAttrs);
   createWithBefore(Model, processedAttrs)
+  // .then(attributes => { console.log(attributes); return attributes; })
   .then( record => mapRecordToPayload( record, type, attributes ) )
   .then( res.jsonApi );
 } );
@@ -58,7 +59,7 @@ module.exports = router;
 
 
 function mapRecordToPayload( record, type, attributes ) {
-  return { id: record.attributes.id, type, attributes };
+  return { id: record.dataValues.id, type, attributes };
 }
 
 function processAttributes( attributes, doCreate ) {

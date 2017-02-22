@@ -1,26 +1,55 @@
 <html>
   <head>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <style>
+    body {
+      font-family: 'Sans Serif';
+    }
+    input {
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+    input[type=submit] {
+      background: #59d;
+      border: 1px solid #59d;
+      color: white;
+    }
+    </style>
   </head>
   <body>
-    <form action="">
+  <h1>JsonAPI</h1>
+
+    <h2>Sign up</h2>
+    <form id="signup" method="POST" action="">
       <input name="email" />
       <input name="password" />
       <input type="submit" value="go" />
     </form>
+
+    <h2>Sign in</h2>
+    <form id="signin" method="POST" action="/auth/signin">
+      <input name="email" />
+      <input name="password" />
+      <input type="submit" value="go" />
+    </form>
+
     <script>
     (function($) {
       $(document).ready(() => {
         $("form").on("submit", e => {
           e.preventDefault();
-          const attributes = {
-            email: $('input[name="email"]').val(),
-            password: $('input[name="password"]').val()
-          };
+          var $form = $(e.target);
+          const fields = $form.find('input').toArray();
+          const attributes = fields.reduce((attrs, field) => {
+            var $field = $(field);
+            if($field.attr('type') === 'submit') return attrs;
+            attrs[$field.attr('name')] = $field.val();
+            return attrs;
+          }, {});
           const data = JSON.stringify({ data: { type: "users", attributes }});
           $.ajax({
-            type: "POST",
-            url: "/api/v1/users",
+            type: $form.attr('method'),
+            url: $form.attr('action'),
             data,
             success: data => { console.log(data); },
             contentType: "application/json; charset=utf-8",
