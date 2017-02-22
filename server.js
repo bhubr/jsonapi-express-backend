@@ -15,27 +15,16 @@ var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var session = require('express-session');
 
-// passport.use(new LocalStrategy(
-//   {
-//     usernameField: 'email',
-//     passReqToCallback: true,
-//     session: true
-//   },
-//   function(req, email, password, done) {
-//     console.log(email, password);
-
-//   }
-// ));
 /**
  * Setup Express
  */
 var app = express();
-app.set('trust proxy', 1) // trust first proxy
-app.use( session({
-   secret : 'H~i%1b7EDyw<1%`oH-aC6yf~q$fW7-<SW|^l1[eC1iouRXj`L_%Y{|Iw[)=Nem}3',
-   name : '_xpjsApiSid',
-  })
-);
+// app.set('trust proxy', 1) // trust first proxy
+// app.use( session({
+//    secret : 'H~i%1b7EDyw<1%`oH-aC6yf~q$fW7-<SW|^l1[eC1iouRXj`L_%Y{|Iw[)=Nem}3',
+//    name : '_xpjsApiSid',
+//   })
+// );
 app.use(express.static('public'));
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use(function(req, res, next) {
@@ -49,6 +38,14 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.use(function(req, res, next) {
+  if(req.path === '/auth/signin') return next();
+  const jwt = req.get('Authorization');
+  console.log(jwt);
+  next();
+});
+
+
 app.use('/api/v1', api);
 
 app.get('/', (req, res) => {
@@ -56,18 +53,6 @@ app.get('/', (req, res) => {
 })
 
 app.post('/auth/signin', (req, res) => {
-  // return passport.authenticate('local', { failureRedirect: '/login' }, function(err, user, info) {
-  //   console.log(arguments);
-  //   if (err) { return next(err); }
-  //   if (!user) { return res.redirect('/'); }
-
-  //   // req / res held in closure
-  //   req.logIn(user, function(err) {
-  //     if (err) { return next(err); }
-  //     return res.send(user);
-  //   });
-
-  // });
   const { email, password } = req.body.data.attributes;
   console.log(email, password);
   User.findOne({ where: { email: email } })
@@ -77,23 +62,25 @@ app.post('/auth/signin', (req, res) => {
     }
     bcrypt.compareAsync(user.dataValues.password, password)
     .then(result => {
-      console.log(user);
-      req.session.user = Object.assign({ permissions: [] }, user.dataValues);
+      delete user.dataValues.password;
+      // console.log(user);
+      // req.session.user = Object.assign({ permissions: [] }, user.dataValues);
+      var permissions = [];
       user.getRoles()
       .then(roles => Promise.map(roles, role => (role.getPermissions())))
       .then(rolesPermissions => {
         rolesPermissions.forEach(rolePermissions => {
           rolePermissions.forEach(permission => {
-            req.session.user.permissions.push(permission);
+            permissions.push(permission);
           })
         });
-        return req.session.user.permissions;
+        return permissions;
       })
       .then(permissions => AuthToken.generate(user, permissions))
       .then(token => {
-        delete req.session.user.password;
-        console.log(req.session, token);
-        return res.jsonApi({ id: req.session.user.id, token: token.value });
+        // delete req.session.user.password;
+        // console.log(req.session, token);
+        return res.jsonApi({ id: user.dataValues.id, token: token.value });
       });
     })
   })
