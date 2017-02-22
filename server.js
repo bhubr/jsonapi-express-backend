@@ -65,7 +65,7 @@ app.post('/auth/signin', (req, res) => {
     bcrypt.compareAsync(user.dataValues.password, password)
     .then(() => user.getPermissions())
     .then(authToken.generate)
-    .then(token => (res.jsonApi({ id: user.dataValues.id, token })));
+    .then(jwt => (res.jsonApi({ userId: user.dataValues.id, jwt })));
   })
   .catch(err => {
     console.log(err);
