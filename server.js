@@ -10,10 +10,11 @@ var port = process.argv.length >= 3 ? parseInt( process.argv[2], 10 ) : 3001;
 
 var passport = require('passport'),
   LocalStrategy = require('passport-local').Strategy;
-var { User, AuthToken } = require('./models');
+var { User } = require('./models');
 var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var session = require('express-session');
+var authToken = require('./authToken');
 
 /**
  * Setup Express
@@ -40,9 +41,11 @@ app.use(function(req, res, next) {
 
 app.use(function(req, res, next) {
   if(req.path === '/auth/signin') return next();
-  const jwt = req.get('Authorization');
-  console.log(jwt);
-  next();
+  const jwt = req.get('Authorization').substr(7); // Strip 'Bearer '
+  // console.log(jwt);
+  authToken.verify(jwt)
+  .then(decoded => { console.log(decoded); next(); })
+  .catch(err => res.status(401).send(err))
 });
 
 
@@ -54,35 +57,15 @@ app.get('/', (req, res) => {
 
 app.post('/auth/signin', (req, res) => {
   const { email, password } = req.body.data.attributes;
-  console.log(email, password);
   User.findOne({ where: { email: email } })
   .then(user => {
     if (!user) {
       return res.status(401).send('no account with this email');
     }
     bcrypt.compareAsync(user.dataValues.password, password)
-    .then(result => {
-      delete user.dataValues.password;
-      // console.log(user);
-      // req.session.user = Object.assign({ permissions: [] }, user.dataValues);
-      var permissions = [];
-      user.getRoles()
-      .then(roles => Promise.map(roles, role => (role.getPermissions())))
-      .then(rolesPermissions => {
-        rolesPermissions.forEach(rolePermissions => {
-          rolePermissions.forEach(permission => {
-            permissions.push(permission);
-          })
-        });
-        return permissions;
-      })
-      .then(permissions => AuthToken.generate(user, permissions))
-      .then(token => {
-        // delete req.session.user.password;
-        // console.log(req.session, token);
-        return res.jsonApi({ id: user.dataValues.id, token: token.value });
-      });
-    })
+    .then(() => user.getPermissions())
+    .then(authToken.generate)
+    .then(token => (res.jsonApi({ id: user.dataValues.id, token })));
   })
   .catch(err => {
     console.log(err);

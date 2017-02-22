@@ -12,12 +12,6 @@ var sequelize = new Sequelize('lux_socnet_dev', 'root', '', {
   },
 });
 
-var path = require('path');
-var fs = require('fs');
-var jwt = require('jsonwebtoken');
-
-const privateKey = fs.readFileSync(path.normalize(__dirname + '/keys/private.key'));  // get private key
-const publicKey = fs.readFileSync(path.normalize(__dirname + '/keys/public.key'));  // get public key
 
 // class Token extends Model {
 //   static belongsTo = {
@@ -67,30 +61,6 @@ const publicKey = fs.readFileSync(path.normalize(__dirname + '/keys/public.key')
 // https://raw.githubusercontent.com/sendyhalim/dignity/master/test/models/sequelize-models/index.js
 const SALT_WORK_FACTOR = 10;
 
-var AuthToken = sequelize.define('authToken', {
-    value: {
-      type: Sequelize.TEXT
-    }
-  },
-  {
-    tableName: 'auth_tokens',
-    timestamps: true
-  }
-);
-AuthToken.generate = function(user, permissions) {
-  const userId = user.id;
-  return new Promise((resolve, reject) => {
-    const exp = Math.floor(Date.now() / 1000) + (60 * 60);
-    const email = user.dataValues.email;
-    jwt.sign({ userId, email, exp, permissions }, privateKey.toString(), { algorithm: 'RS256' }, function(err, token) {
-      console.log(token);
-      if(err) reject(err);
-      resolve(token);
-    });
-  })
-  .then(value => this.create({ value, userId }));
-}
-
 var User = sequelize.define('user', {
     firstName: {
       type: Sequelize.STRING
@@ -106,7 +76,23 @@ var User = sequelize.define('user', {
     }
   },
   {
-  timestamps: true
+    timestamps: true,
+    instanceMethods: {
+      getPermissions: function() {
+        let permissions = [];
+        return this.getRoles()
+        .then(roles => Promise.map(roles, role => (role.getPermissions())))
+        .then(rolesPermissions => {
+          rolesPermissions.forEach(rolePermissions => {
+            rolePermissions.forEach(permission => {
+              permissions.push(permission.dataValues.name);
+            })
+          });
+          this._permissions = permissions;
+          return this;
+        });
+      }
+    }
   }
 );
 
@@ -167,7 +153,7 @@ User.belongsToMany(Role, {
   foreignKey: 'userId'
 });
 
-User.hasMany(AuthToken);
+// User.hasMany(AuthToken);
 
 Role.belongsToMany(User, {
   through: UsersRoles,
@@ -185,5 +171,5 @@ Permission.belongsToMany(Role, {
 });
 
 module.exports = {
-  User, Role, Permission, AuthToken
+  User, Role, Permission
 };
