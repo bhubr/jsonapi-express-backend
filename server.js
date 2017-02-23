@@ -53,16 +53,19 @@ function isWhitelisted(method, path) {
   return false;
 }
 
-app.use(function(req, res, next) {
-  if(isWhitelisted(req.method, req.path)) return next();
-  console.log('should not be here if whitelisted');
-  const authHeader = req.get('Authorization');
-  if(authHeader === undefined) return next();
-  const jwt = authHeader.substr(7); // Strip 'Bearer '
-  authToken.verify(jwt)
-  .then(decoded => { console.log(decoded); next(); })
-  .catch(err => res.status(401).send(err))
-});
+/**
+ * JWT checking middleware
+ */
+// app.use(function(req, res, next) {
+//   if(isWhitelisted(req.method, req.path)) return next();
+//   console.log('should not be here if whitelisted');
+//   const authHeader = req.get('Authorization');
+//   if(authHeader === undefined) return next();
+//   const jwt = authHeader.substr(7); // Strip 'Bearer '
+//   authToken.verify(jwt)
+//   .then(decoded => { console.log(decoded); next(); })
+//   .catch(err => res.status(401).send(err))
+// });
 
 
 app.use('/api/v1', api);

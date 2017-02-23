@@ -29,13 +29,19 @@ function kebabAttributes(attributes) {
 
 function mapRecords(records, type) {
   return _.map(records, model => {
-    const id = model.dataValues.id;
-    delete model.dataValues.id;
-    const attributes = kebabAttributes(model.dataValues);
+    const id = model.id;
+    delete model.id;
+    const attributes = kebabAttributes(model);
     return Object.assign({}, { id, type }, { attributes });
   });
 }
 
+function passLog(label) {
+  return function(data) {
+    console.log(label, data);
+    return data;
+  }
+}
 module.exports = {
-  lowerCamelAttributes, snakeAttributes, kebabAttributes, mapRecords
+  lowerCamelAttributes, snakeAttributes, kebabAttributes, mapRecords, passLog
 }

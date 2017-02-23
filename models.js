@@ -59,7 +59,7 @@ var sequelize = new Sequelize('lux_socnet_dev', 'root', '', {
 
 // For Roles&Permissions
 // https://raw.githubusercontent.com/sendyhalim/dignity/master/test/models/sequelize-models/index.js
-const SALT_WORK_FACTOR = 10;
+
 
 var User = sequelize.define('user', {
     firstName: {
@@ -97,12 +97,7 @@ var User = sequelize.define('user', {
   }
 );
 
-function passLog(label) {
-  return function(data) {
-    console.log(label, data);
-    return data;
-  }
-}
+
 User.beforeCreate = function(attributes) {
   return new Promise((resolve, reject) => {
     return bcrypt.genSaltAsync(SALT_WORK_FACTOR)
