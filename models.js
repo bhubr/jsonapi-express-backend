@@ -119,6 +119,26 @@ User.getRoleModel = function () {
 };
 
 
+var Ride = sequelize.define('ride', {
+  departure: {
+    type: Sequelize.STRING
+  },
+  arrival: {
+    type: Sequelize.STRING
+  },
+  date: {
+    type: Sequelize.STRING
+  }
+});
+Ride.belongsTo(User, {
+  foreignKey: 'userId'
+});
+Ride.beforeCreate = function(attributes) {
+  return new Promise((resolve, reject) => {
+    resolve(attributes);
+  });
+}
+
 var Role = sequelize.define('roles', {
   name: Sequelize.STRING
 }, {
@@ -177,5 +197,5 @@ Permission.belongsToMany(Role, {
 });
 
 module.exports = {
-  User, Role, Permission
+  User, Role, Permission, Ride
 };

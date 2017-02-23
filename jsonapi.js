@@ -49,6 +49,7 @@ router.post('/:type', (req, res) => {
   const attributes = req.body.data.attributes;
   const processedAttrs = processAttributes( attributes, true );
   const Model = models[objType];
+  console.log(models, objType, models[objType]);
   // Model.create(processedAttrs);
   createWithBefore(Model, processedAttrs)
   // .then(attributes => { console.log(attributes); return attributes; })
