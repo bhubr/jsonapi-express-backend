@@ -16,11 +16,10 @@ function selectOne(table, id) {
 }
 
 function insert(table, attributes) {
+  attributes = Array.isArray(attributes) ? attributes : [attributes];
   return squel.insert()
     .into(table)
-    .setFieldsRows([
-        attributes
-    ])
+    .setFieldsRows(attributes)
     .toString();
 }
 

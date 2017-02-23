@@ -21,7 +21,8 @@
     "passport-local": "^1.0.0",
     "sequelize": "^3.30.2",
     "sequelize-cli": "^2.5.1",
-    "squel": "^5.7.0"
+    "squel": "^5.7.0",
+    "store-chain": "^2.0.3"
   },
   "devDependencies": {
     "chai": "^3.5.0",

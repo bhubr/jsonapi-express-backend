@@ -44,6 +44,7 @@ function beforeCreate(table, attributes) {
   return beforeCreateHooks[table](attributes);
 }
 
+var chain      = require('store-chain');
 var mysql      = require('mysql');
 var config     = require('./config/config.json');
 var env        = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
@@ -61,6 +62,108 @@ const queryAsync = Promise.promisify(connection.query.bind(connection));
 //   console.log('The solution is: ', results[0].email);
 // });
 
+const relationshipsMap = {
+  users: {
+    posts: {
+      table: 'posts',
+      type: 'hasMany',
+      reverse: 'author'
+    }
+  },
+  posts: {
+    author: {
+      table: 'users',
+      type: 'belongsTo',
+      reverse: 'posts'
+    },
+    tags: {
+      table: 'tags',
+      type: 'hasMany',
+      reverse: 'posts'
+    }
+  },
+  tags: {
+    posts: {
+      table: 'posts',
+      type: 'hasMany',
+      reverse: 'tags'
+    }
+  }
+}
+
+function getFunc(method, thisType, revType) {
+  if(thisType === 'belongsTo' && revType === 'hasMany') {
+    return method + 'OneToManyRelatee';
+  }
+  if(thisType === 'hasMany' && revType === 'hasMany') {
+    return method + 'ManyToManyRelatee';
+  }
+  else throw Error('not implemented for ' + method + ':' + thisType + ':' + revType);
+}
+
+function setOneToManyRelatee() {
+
+}
+
+function processPayloadRelationships(table, relationships) {
+  var output = { deferred: {}, immediate: {} };
+  for(var k in relationships) {
+    var rel = relationships[k].data;
+    console.log(table, k, rel);
+    if(relationshipsMap[table] !== undefined && relationshipsMap[table][k] !== undefined) {
+      var mapEntry = relationshipsMap[table][k];
+      console.log('found relationship: [' + table + '] => ' + mapEntry.table + ',' + mapEntry.type);
+      var revEntry = relationshipsMap[mapEntry.table][mapEntry.reverse];
+      console.log('reverse relationship: [' + mapEntry.table + '] => ' + revEntry.table + ',' + revEntry.type);
+      func = getFunc('set', mapEntry.type, revEntry.type);
+      console.log(func);
+      if( mapEntry.type === 'belongsTo' && revEntry.type === 'hasMany' ) {
+        // var obj = {};
+        // obj[k + 'Id'] = parseInt(rel.id, 10);
+        // output.push({ deferred: false, obj })
+        output.immediate[k + 'Id'] = parseInt(rel.id, 10);
+      }
+      else if(mapEntry.type === 'hasMany' && revEntry.type === 'hasMany') {
+        // console.log('deferred', rel, );
+        const thisFirst = table < mapEntry.table;
+        const pivotTable = thisFirst ?
+          table + '_' + mapEntry.table + '_' + k :
+          mapEntry.table + '_' + table + '_' + mapEntry.reverse;
+        const ids = _.map(rel, entry => parseInt(entry.id));
+        console.log('## many many', thisFirst, pivotTable, ids);
+        const relTable = mapEntry.table;
+        output.deferred[pivotTable] = { thisFirst, relTable, ids };
+      }
+    }
+  }
+  console.log(output);
+  return output;
+}
+
+function performDeferred(table, insertId, deferred) {
+  console.log('##deferred', deferred);
+  var promises = [];
+  for (var pivotTable in deferred) {
+    const { thisFirst, relTable,ids } = deferred[pivotTable];
+    const thisType = _.singularize(table);
+    const relType  = _.singularize(relTable);
+    const values =  _.reduce(ids, (prev, id) => {
+      let obj = {};
+      obj[thisType + 'Id'] = insertId;
+      obj[relType + 'Id'] = id;
+      return prev.concat(obj);
+    }, []);
+    console.log(values);
+    promises.push(queryBuilder.insert(pivotTable, values));
+    //const thisIds = _.times(ids.length, insertId);
+    // const values = thisFirst ? _.reduce((ids, (prev, id) => { prev.push(insertId) }, []);
+  }
+  return Promise.all(promises)
+  .then(utils.passLog('queries:'))
+  .then(queries => Promise.map(queries, function(query) {
+    return queryAsync(query);
+  }));
+}
 /**
  * Fetching all resources of some type
  */
@@ -88,12 +191,28 @@ router.get('/:table/:id', (req, res) => {
 // define the home page route
 router.post('/:table', (req, res) => {
   const { table } = queryParams.tableOnly(req);
+  console.log(req.body.data);
   const attributes = req.body.data.attributes;
-  const lowerCamelAttributes = processAttributes( attributes, true );
-  beforeCreate(table, lowerCamelAttributes)
+  const relationships = processPayloadRelationships(table, req.body.data.relationships);
+  // const immediate = _.find(relationships, { deferred: false });
+  // const relAttributes = _.reduce(immediate, (attrs, item) => {
+
+  // }, {});
+  //   immediate.reduce(())
+  relAttributes = relationships.immediate;
+  console.log(relAttributes, relationships.deferred);
+
+  const lowerCamelAttributes = Object.assign({},
+    relAttributes, processAttributes( attributes, true )
+  );
+  chain(beforeCreate(table, lowerCamelAttributes))
   .then(finalAttributes => queryBuilder.insert(table, finalAttributes))
   .then(queryAsync)
-  .then(({ insertId }) => queryBuilder.selectOne(table, insertId))
+  .then(({ insertId }) => (insertId))
+  .set('insertId')
+  .then(insertId => performDeferred(table, insertId, relationships.deferred))
+  .then(utils.passLog('deferred results'))
+  .get( ({insertId}) => queryBuilder.selectOne(table, insertId))
   .then(queryAsync)
   .then(records => utils.mapRecords(records, table))
   .then(mapped => (mapped[0]))
