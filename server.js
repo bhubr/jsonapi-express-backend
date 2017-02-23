@@ -27,7 +27,7 @@ var app = express();
 //   })
 // );
 app.use(express.static('public'));
-app.use(bodyParser.json({ type: 'application/json' }));
+app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 app.use(function(req, res, next) {
   res.jsonApi = function(data) {
     res.set({
@@ -39,10 +39,26 @@ app.use(function(req, res, next) {
   next();
 });
 
+function isWhitelisted(method, path) {
+  const whitelist = ['POST /auth/signin', 'POST /api/v1/users'];
+  const listBits = whitelist.map(descriptor => descriptor.split(' '));
+  for(let i = 0 ; i < listBits.length ; i++) {
+    const bit = listBits[i];
+    console.log(bit);
+    if(method === bit[0] && path === bit[1]) {
+      console.log('# whitelisted path', whitelist[i]);
+      return true;
+    }
+  }
+  return false;
+}
+
 app.use(function(req, res, next) {
-  if(req.path === '/auth/signin') return next();
-  const jwt = req.get('Authorization').substr(7); // Strip 'Bearer '
-  // console.log(jwt);
+  if(isWhitelisted(req.method, req.path)) return next();
+  console.log('should not be here if whitelisted');
+  const authHeader = req.get('Authorization');
+  if(authHeader === undefined) return next();
+  const jwt = authHeader.substr(7); // Strip 'Bearer '
   authToken.verify(jwt)
   .then(decoded => { console.log(decoded); next(); })
   .catch(err => res.status(401).send(err))

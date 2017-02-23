@@ -13,7 +13,10 @@ function createWithBefore(Model, attributes) {
     else {
       return Model.beforeCreate(attributes)
       .then(attributes => { console.log(attributes); return attributes; })
-      .then(Model.create.bind(Model));
+      .then(Model.create.bind(Model))
+      .then(record => {
+        return record.afterCreate ? record.afterCreate() : record;
+      });
     }
   // });
 }

@@ -91,17 +91,23 @@ var User = sequelize.define('user', {
           this._permissions = permissions;
           return this;
         });
-      }
+      },
+      // afterCreate: function() {}
     }
   }
 );
 
+function passLog(label) {
+  return function(data) {
+    console.log(label, data);
+    return data;
+  }
+}
 User.beforeCreate = function(attributes) {
   return new Promise((resolve, reject) => {
     return bcrypt.genSaltAsync(SALT_WORK_FACTOR)
     .then(salt => bcrypt.hashAsync(attributes.password, salt))
     .then(hash => {
-      console.log('hash', attributes.password, '=>', hash);
       resolve(Object.assign(attributes, { password: hash }));
     })
     .catch(reject);
