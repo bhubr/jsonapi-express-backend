@@ -58,9 +58,6 @@ var connection = mysql.createConnection({
 
 connection.connect();
 const queryAsync = Promise.promisify(connection.query.bind(connection));
-// queryAsync('select * from users').then( (results, fields) => {
-//   console.log('The solution is: ', results[0].email);
-// });
 
 const relationshipsMap = {
   users: {
@@ -134,7 +131,7 @@ function setOneToManyRelatee() {
 
 function processPayloadRelationships(req, res, next) {
   const { table } = queryParams.tableOnly(req);
-  const relationships = req.body.data.relationships; //processPayloadRelationships(table, req.body.data.relationships);
+  const relationships = req.body.data.relationships;
   var output = { deferred: {}, immediate: {} };
   for(var k in relationships) {
     var rel = relationships[k].data;
@@ -199,22 +196,22 @@ function performDeferred(table, insertId, deferred) {
  * Fetching all resources of some type
  */
 router.get('/:table', (req, res) => {
-  const { table } = queryParams.tableOnly(req);
-  console.log('table', table);
+  const { table, type } = queryParams.tableOnly(req);
+  console.log('table&type', table, type);
   const sql = queryBuilder.selectAll(table);
   queryAsync(sql)
-  .then(records => utils.mapRecords(records, table))
+  .then(records => utils.mapRecords(records, type))
   .then(res.jsonApi)
   .catch(err => res.status(500).send(err.message));
 });
 
 router.get('/:table/:id', (req, res) => {
-  const { table, id } = queryParams.tableAndId(req);
+  const { table, type, id } = queryParams.tableAndId(req);
   const sql = queryBuilder.selectOne(table, id);
   console.log(sql);
   queryAsync(sql)
   .then(utils.passLog('records'))
-  .then(records => utils.mapRecords(records, table))
+  .then(records => utils.mapRecords(records, type))
   .then(mapped => (mapped[0]))
   .then(res.jsonApi)
   .catch(err => res.status(500).send(err.message));
@@ -222,7 +219,7 @@ router.get('/:table/:id', (req, res) => {
 
 // define the home page route
 router.post('/:table', processPayloadRelationships, (req, res) => {
-  const { table } = queryParams.tableOnly(req);
+  const { table, type } = queryParams.tableOnly(req);
   // console.log(req.body.data);
   const attributes = req.body.data.attributes;
   const relationships = req.relationships; // processPayloadRelationships(table, req.body.data.relationships);
@@ -246,7 +243,7 @@ router.post('/:table', processPayloadRelationships, (req, res) => {
   .then(utils.passLog('deferred results'))
   .get( ({insertId}) => queryBuilder.selectOne(table, insertId))
   .then(queryAsync)
-  .then(records => utils.mapRecords(records, table))
+  .then(records => utils.mapRecords(records, type))
   .then(mapped => (mapped[0]))
   .then( res.jsonApi )
   .catch(err => res.status(500).send(err.message));
@@ -256,7 +253,7 @@ function patchOrPut(req, res) {
   const id = req.params.id;
   // const type = req.params.type;
   // const objType = _.titleize( _.singularize( type ) );
-  const { table } = queryParams.tableOnly(req);
+  const { table, type } = queryParams.tableOnly(req);
   const attributes = req.body.data.attributes;
   relAttributes = req.relationships.immediate;
   const processedAttrs = processAttributes( attributes );
@@ -267,7 +264,7 @@ function patchOrPut(req, res) {
   .then(() => performDeferred(table, id, req.relationships.deferred))
   .then(() => queryBuilder.selectOne(table, id))
   .then(queryAsync)
-  .then(records => utils.mapRecords(records, table))
+  .then(records => utils.mapRecords(records, type))
   .then(utils.passLog('records'))
   .then(mapped => (mapped[0]))
   .then( res.jsonApi )
@@ -347,3 +344,4 @@ function updateResource( req, res ) {
 function processPayload(req, res, next) {
 
 }
+
