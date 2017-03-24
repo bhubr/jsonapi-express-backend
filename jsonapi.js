@@ -132,7 +132,9 @@ function setOneToManyRelatee() {
 
 }
 
-function processPayloadRelationships(table, relationships) {
+function processPayloadRelationships(req, res, next) {
+  const { table } = queryParams.tableOnly(req);
+  const relationships = req.body.data.relationships; //processPayloadRelationships(table, req.body.data.relationships);
   var output = { deferred: {}, immediate: {} };
   for(var k in relationships) {
     var rel = relationships[k].data;
@@ -163,8 +165,10 @@ function processPayloadRelationships(table, relationships) {
       }
     }
   }
-  console.log(output);
-  return output;
+  // console.log(output);
+  // return output;
+  req.relationships = output;
+  next();
 }
 
 function performDeferred(table, insertId, deferred) {
@@ -217,11 +221,11 @@ router.get('/:table/:id', (req, res) => {
 });
 
 // define the home page route
-router.post('/:table', (req, res) => {
+router.post('/:table', processPayloadRelationships, (req, res) => {
   const { table } = queryParams.tableOnly(req);
-  console.log(req.body.data);
+  // console.log(req.body.data);
   const attributes = req.body.data.attributes;
-  const relationships = processPayloadRelationships(table, req.body.data.relationships);
+  const relationships = req.relationships; // processPayloadRelationships(table, req.body.data.relationships);
   // const immediate = _.find(relationships, { deferred: false });
   // const relAttributes = _.reduce(immediate, (attrs, item) => {
 
@@ -231,7 +235,7 @@ router.post('/:table', (req, res) => {
   console.log(relAttributes, relationships.deferred);
 
   const lowerCamelAttributes = Object.assign({},
-    relAttributes, processAttributes( attributes, true )
+    relAttributes, processAttributes( attributes, { create: true } )
   );
   chain(beforeCreate(table, lowerCamelAttributes))
   .then(finalAttributes => queryBuilder.insert(table, finalAttributes))
@@ -248,18 +252,35 @@ router.post('/:table', (req, res) => {
   .catch(err => res.status(500).send(err.message));
 } );
 
-// define the home page route
-router.put('/:type/:id', (req, res) => {
+function patchOrPut(req, res) {
   const id = req.params.id;
-  const type = req.params.type;
-  const objType = _.titleize( _.singularize( type ) );
+  // const type = req.params.type;
+  // const objType = _.titleize( _.singularize( type ) );
+  const { table } = queryParams.tableOnly(req);
   const attributes = req.body.data.attributes;
+  relAttributes = req.relationships.immediate;
   const processedAttrs = processAttributes( attributes );
-  new models[objType]({ id }).save( processedAttrs )
-  .then( record => { console.log( '## updated'); console.log(record); return record; } )
-  .then( record => mapRecordToPayload( record, type, attributes ) )
-  .then( res.jsonApi );
-} );
+  const lowerCamelAttributes = Object.assign({},
+    relAttributes, processedAttrs
+  );
+  return queryAsync(queryBuilder.updateOne(table, id, lowerCamelAttributes))
+  .then(() => performDeferred(table, id, req.relationships.deferred))
+  .then(() => queryBuilder.selectOne(table, id))
+  .then(queryAsync)
+  .then(records => utils.mapRecords(records, table))
+  .then(utils.passLog('records'))
+  .then(mapped => (mapped[0]))
+  .then( res.jsonApi )
+  .catch(err => res.status(500).send(err.message));
+
+  // new models[objType]({ id }).save( processedAttrs )
+  // .then( record => { console.log( '## updated'); console.log(record); return record; } )
+  // .then( record => mapRecordToPayload( record, type, attributes ) )
+  // .then( res.jsonApi );
+}
+// define the home page route
+router.patch('/:table/:id', processPayloadRelationships, patchOrPut);
+router.put('/:table/:id', processPayloadRelationships, patchOrPut);
 module.exports = router;
 
 
@@ -286,13 +307,13 @@ Date.prototype.toMysqlFormat = function() {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };
 
-function processAttributes( attributes, doCreate ) {
+function processAttributes( attributes, options ) {
   let updatedAt = new Date().toMysqlFormat();
   let outputAttrs = Object.assign( {},
     utils.lowerCamelAttributes( attributes ),
     { updatedAt }
   );
-  if( doCreate ) {
+  if( options && options.create ) {
     outputAttrs.createdAt = updatedAt;
   }
   return outputAttrs;

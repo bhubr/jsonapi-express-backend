@@ -2,17 +2,17 @@ const squel = require("squel");
 
 function selectAll(table) {
   return squel.select()
-  .from(table)
-  .field('*')
-  .toString();
+    .from(table)
+    .field('*')
+    .toString();
 }
 
 function selectOne(table, id) {
   return squel.select()
-  .from(table)
-  .field('*')
-  .where("id = ?", id)
-  .toString();
+    .from(table)
+    .field('*')
+    .where("id = ?", id)
+    .toString();
 }
 
 function insert(table, attributes) {
@@ -23,6 +23,14 @@ function insert(table, attributes) {
     .toString();
 }
 
+function updateOne(table, id, attributes) {
+  console.log('### updateOne', attributes);
+  return squel.update()
+    .table(table)
+    .setFields(attributes)
+    .where('id = ' + id)
+    .toString();
+}
 // describe('squel query', () => {
   
 // 	it('should build a select query', () => {
@@ -37,4 +45,4 @@ function insert(table, attributes) {
 
 // });
 
-module.exports = { selectAll, selectOne, insert };
+module.exports = { selectAll, selectOne, insert, updateOne };
