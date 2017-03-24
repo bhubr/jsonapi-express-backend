@@ -5,8 +5,9 @@ const queryParams = require('../queryParams');
 
 const reqEmptyParams = { params: {} };
 const reqTableOnly = { params: { table: 'users' } };
+const reqTableOnlyDashed = { params: { table: 'car-makes' } };
 const reqTableBadId = { params: { table: 'users', id: 'foo' } };
-const reqTableGoodId = { params: { table: 'users', id: '5' } };
+const reqTableGoodId = { params: { table: 'car-makes', id: '5' } };
 
 describe('queryParams', () => {
 	
@@ -22,6 +23,12 @@ describe('queryParams', () => {
     const res = queryParams.tableOnly(reqTableOnly);
     res.table.should.exist;
     res.table.should.equal('users');
+  });
+
+  it('tableOnly should return lowercased table name', () => {
+    const res = queryParams.tableOnly(reqTableOnlyDashed);
+    res.table.should.exist;
+    res.table.should.equal('carmakes');
   });
 
   it('tableAndId should throw if no table is passed', () => {
@@ -52,7 +59,15 @@ describe('queryParams', () => {
     const res = queryParams.tableAndId(reqTableGoodId);
     res.table.should.exist;
     res.id.should.exist;
-    res.table.should.equal('users');
+    res.table.should.equal('carmakes');
+    res.id.should.equal(5);
+  });
+
+  it('tableAndId should return table and id', () => {
+    const res = queryParams.tableAndId(reqTableGoodId);
+    res.table.should.exist;
+    res.id.should.exist;
+    res.table.should.equal('carmakes');
     res.id.should.equal(5);
   });
 
