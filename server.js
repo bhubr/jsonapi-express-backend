@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 var utils = require('./utils');
 var api = require('./jsonapi');
 var templates = require('./templates');
-var port = process.argv.length >= 3 ? parseInt( process.argv[2], 10 ) : 3001;
+var port = process.argv.length >= 3 ? parseInt( process.argv[2], 10 ) : 3002;
 // var passport = require('./signin');
 
 var passport = require('passport'),

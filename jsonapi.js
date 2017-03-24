@@ -68,6 +68,11 @@ const relationshipsMap = {
       table: 'posts',
       type: 'hasMany',
       reverse: 'author'
+    },
+    car: {
+      table: 'cars',
+      type: 'belongsTo',
+      reverse: 'owner'
     }
   },
   posts: {
@@ -88,10 +93,32 @@ const relationshipsMap = {
       type: 'hasMany',
       reverse: 'tags'
     }
+  },
+  cars: {
+    make: {
+      table: 'carmakes',
+      type: 'belongsTo',
+      reverse: 'cars'
+    },
+    owner: {
+      table: 'users',
+      type: 'belongsTo',
+      reverse: 'car'
+    }
+  },
+  carmakes: {
+    cars: {
+      table: 'cars',
+      type: 'hasMany',
+      reverse: 'make'
+    }
   }
 }
 
 function getFunc(method, thisType, revType) {
+  if(thisType === 'belongsTo' && revType === 'belongsTo') {
+    return method + 'OneToOneRelatee';
+  }
   if(thisType === 'belongsTo' && revType === 'hasMany') {
     return method + 'OneToManyRelatee';
   }
@@ -117,7 +144,7 @@ function processPayloadRelationships(table, relationships) {
       console.log('reverse relationship: [' + mapEntry.table + '] => ' + revEntry.table + ',' + revEntry.type);
       func = getFunc('set', mapEntry.type, revEntry.type);
       console.log(func);
-      if( mapEntry.type === 'belongsTo' && revEntry.type === 'hasMany' ) {
+      if( mapEntry.type === 'belongsTo' ) { //} && revEntry.type === 'hasMany' ) {
         // var obj = {};
         // obj[k + 'Id'] = parseInt(rel.id, 10);
         // output.push({ deferred: false, obj })
@@ -169,6 +196,7 @@ function performDeferred(table, insertId, deferred) {
  */
 router.get('/:table', (req, res) => {
   const { table } = queryParams.tableOnly(req);
+  console.log('table', table);
   const sql = queryBuilder.selectAll(table);
   queryAsync(sql)
   .then(records => utils.mapRecords(records, table))
