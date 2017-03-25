@@ -75,15 +75,21 @@ router.get('/:table', (req, res) => {
   .catch(err => res.status(500).send(err.message));
 });
 
-router.get('/:table/:id', (req, res) => {
+router.get('/:table/:id',
+  // middlewares.extractTableAndTypeGet,
+  // middlewares.getRelationships,
+  (req, res) => {
   const { table, type, id } = queryParams.tableAndId(req);
   const sql = queryBuilder.selectOne(table, id);
   const mapRecord = utils.getMapRecord(type);
+  const getRelationships = middlewares.getGetRelationships(table, queryAsync);
   console.log(sql);
   queryAsync(sql)
   .then(utils.passLog('records'))
   .then(utils.extractFirstRecord)
+  // .then(stripRelAttributes)
   .then(mapRecord)
+  .then(getRelationships)
   .then(res.jsonApi)
   .catch(err => res.status(500).send(err.message));
 });
@@ -121,7 +127,7 @@ function getInsertOrUpdate(query) {
 
 // define the home page route
 router.post('/:table',
-  middlewares.extractTableAndType,
+  middlewares.extractTableAndTypePostOrPatch,
   middlewares.convertAttributes,
   middlewares.extractReqRelationships,
   (req, res) => {
@@ -140,13 +146,13 @@ function patchOrPut(req, res) {
 
 // define the home page route
 router.patch('/:table/:id',
-  middlewares.extractTableAndType,
+  middlewares.extractTableAndTypePostOrPatch,
   middlewares.convertAttributes,
   middlewares.extractReqRelationships,
   patchOrPut
 );
 router.put('/:table/:id',
-  middlewares.extractTableAndType,
+  middlewares.extractTableAndTypePostOrPatch,
   middlewares.convertAttributes,
   middlewares.extractReqRelationships,
   patchOrPut

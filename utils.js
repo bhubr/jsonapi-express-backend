@@ -67,6 +67,14 @@ function getRecordId(id) {
   }
 }
 
+function mapRelationship(entry, type) {
+  return { id: '' + entry.id, type };
+}
+
+function mapRelationships(entries, type) {
+  return entries.map(entry => mapRelationship(entry, type));
+}
+
 function getStripRelAttributes(relationshipAttrs) {
   const keysToStrip = Object.keys(relationshipAttrs);
   return record => (_.reduce(record, (carry, val, key) => {
@@ -140,6 +148,8 @@ module.exports = {
   lowerCamelAttributes,
   snakeAttributes,
   kebabAttributes,
+  mapRelationships,
+  mapRelationship,
   getMapRecords,
   getMapRecord,
   getRecordId,
