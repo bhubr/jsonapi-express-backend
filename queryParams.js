@@ -5,8 +5,9 @@ function tableOnly(req) {
   if(table === undefined) {
     throw new Error('table param is undefined');
   }
+  const type = _.kebabCase(table);
   table = (_.camelCase(table)).toLowerCase();
-  return { table };
+  return { table, type };
 }
 
 function tableAndId(req, id) {
@@ -15,11 +16,12 @@ function tableAndId(req, id) {
   if(table === undefined) {
     throw new Error('table param is undefined');
   }
+  const type = _.kebabCase(table);
   table = (_.camelCase(table)).toLowerCase();
   if(isNaN(id)) {
     throw new Error('id ' + id + ' is NaN');
   }
-  return { table, id: parseInt(id, 10) };
+  return { table, type, id: parseInt(id, 10) };
 }
 
 module.exports = { tableOnly, tableAndId };

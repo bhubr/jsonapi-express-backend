@@ -1,5 +1,5 @@
 const utils = require('./utils');
-// const models = require('./models');
+const middlewares = require('./jsonapi-middlewares');
 const Promise = require('bluebird');
 let _ = require("lodash");
 _.mixin(require("lodash-inflection"));
@@ -10,23 +10,23 @@ const queryParams = require('./queryParams');
 const queryBuilder = require('./queryBuilder');
 const SALT_WORK_FACTOR = 10;
 
-function createWithBefore(Model, attributes) {
-  // return new Promise((resolve, reject) => {
-    if(Model.beforeCreate === undefined) {
-      return Model.create(attributes);
-    }
-    else {
-      return Model.beforeCreate(attributes)
-      .then(attributes => { console.log(attributes); return attributes; })
-      .then(Model.create.bind(Model))
-      .then(record => {
-        return record.afterCreate ? record.afterCreate() : record;
-      });
-    }
-  // });
-}
+// function createWithBefore(Model, attributes) {
+//   // return new Promise((resolve, reject) => {
+//     if(Model.beforeSave === undefined) {
+//       return Model.create(attributes);
+//     }
+//     else {
+//       return Model.beforeSave(attributes)
+//       .then(attributes => { console.log(attributes); return attributes; })
+//       .then(Model.create.bind(Model))
+//       .then(record => {
+//         return record.afterCreate ? record.afterCreate() : record;
+//       });
+//     }
+//   // });
+// }
 
-const beforeCreateHooks = {
+const beforeSaveHooks = {
   users: function(attributes) {
     return new Promise((resolve, reject) => {
       return bcrypt.genSaltAsync(SALT_WORK_FACTOR)
@@ -39,9 +39,9 @@ const beforeCreateHooks = {
   }
 }
 
-function beforeCreate(table, attributes) {
-  if(beforeCreateHooks[table] === undefined) return Promise.resolve(attributes);
-  return beforeCreateHooks[table](attributes);
+function beforeSave(table, attributes) {
+  if(beforeSaveHooks[table] === undefined) return Promise.resolve(attributes);
+  return beforeSaveHooks[table](attributes);
 }
 
 var chain      = require('store-chain');
@@ -59,139 +59,8 @@ var connection = mysql.createConnection({
 connection.connect();
 const queryAsync = Promise.promisify(connection.query.bind(connection));
 
-const relationshipsMap = {
-  users: {
-    posts: {
-      table: 'posts',
-      type: 'hasMany',
-      reverse: 'author'
-    },
-    car: {
-      table: 'cars',
-      type: 'belongsTo',
-      reverse: 'owner'
-    }
-  },
-  posts: {
-    author: {
-      table: 'users',
-      type: 'belongsTo',
-      reverse: 'posts'
-    },
-    tags: {
-      table: 'tags',
-      type: 'hasMany',
-      reverse: 'posts'
-    }
-  },
-  tags: {
-    posts: {
-      table: 'posts',
-      type: 'hasMany',
-      reverse: 'tags'
-    }
-  },
-  cars: {
-    make: {
-      table: 'carmakes',
-      type: 'belongsTo',
-      reverse: 'cars'
-    },
-    owner: {
-      table: 'users',
-      type: 'belongsTo',
-      reverse: 'car'
-    }
-  },
-  carmakes: {
-    cars: {
-      table: 'cars',
-      type: 'hasMany',
-      reverse: 'make'
-    }
-  }
-}
 
-function getFunc(method, thisType, revType) {
-  if(thisType === 'belongsTo' && revType === 'belongsTo') {
-    return method + 'OneToOneRelatee';
-  }
-  if(thisType === 'belongsTo' && revType === 'hasMany') {
-    return method + 'OneToManyRelatee';
-  }
-  if(thisType === 'hasMany' && revType === 'hasMany') {
-    return method + 'ManyToManyRelatee';
-  }
-  else throw Error('not implemented for ' + method + ':' + thisType + ':' + revType);
-}
 
-function setOneToManyRelatee() {
-
-}
-
-function processPayloadRelationships(req, res, next) {
-  const { table } = queryParams.tableOnly(req);
-  const relationships = req.body.data.relationships;
-  var output = { deferred: {}, immediate: {} };
-  for(var k in relationships) {
-    var rel = relationships[k].data;
-    console.log(table, k, rel);
-    if(relationshipsMap[table] !== undefined && relationshipsMap[table][k] !== undefined) {
-      var mapEntry = relationshipsMap[table][k];
-      console.log('found relationship: [' + table + '] => ' + mapEntry.table + ',' + mapEntry.type);
-      var revEntry = relationshipsMap[mapEntry.table][mapEntry.reverse];
-      console.log('reverse relationship: [' + mapEntry.table + '] => ' + revEntry.table + ',' + revEntry.type);
-      func = getFunc('set', mapEntry.type, revEntry.type);
-      console.log(func);
-      if( mapEntry.type === 'belongsTo' ) { //} && revEntry.type === 'hasMany' ) {
-        // var obj = {};
-        // obj[k + 'Id'] = parseInt(rel.id, 10);
-        // output.push({ deferred: false, obj })
-        output.immediate[k + 'Id'] = parseInt(rel.id, 10);
-      }
-      else if(mapEntry.type === 'hasMany' && revEntry.type === 'hasMany') {
-        // console.log('deferred', rel, );
-        const thisFirst = table < mapEntry.table;
-        const pivotTable = thisFirst ?
-          table + '_' + mapEntry.table + '_' + k :
-          mapEntry.table + '_' + table + '_' + mapEntry.reverse;
-        const ids = _.map(rel, entry => parseInt(entry.id));
-        console.log('## many many', thisFirst, pivotTable, ids);
-        const relTable = mapEntry.table;
-        output.deferred[pivotTable] = { thisFirst, relTable, ids };
-      }
-    }
-  }
-  // console.log(output);
-  // return output;
-  req.relationships = output;
-  next();
-}
-
-function performDeferred(table, insertId, deferred) {
-  console.log('##deferred', deferred);
-  var promises = [];
-  for (var pivotTable in deferred) {
-    const { thisFirst, relTable,ids } = deferred[pivotTable];
-    const thisType = _.singularize(table);
-    const relType  = _.singularize(relTable);
-    const values =  _.reduce(ids, (prev, id) => {
-      let obj = {};
-      obj[thisType + 'Id'] = insertId;
-      obj[relType + 'Id'] = id;
-      return prev.concat(obj);
-    }, []);
-    console.log(values);
-    promises.push(queryBuilder.insert(pivotTable, values));
-    //const thisIds = _.times(ids.length, insertId);
-    // const values = thisFirst ? _.reduce((ids, (prev, id) => { prev.push(insertId) }, []);
-  }
-  return Promise.all(promises)
-  .then(utils.passLog('queries:'))
-  .then(queries => Promise.map(queries, function(query) {
-    return queryAsync(query);
-  }));
-}
 /**
  * Fetching all resources of some type
  */
@@ -199,8 +68,9 @@ router.get('/:table', (req, res) => {
   const { table, type } = queryParams.tableOnly(req);
   console.log('table&type', table, type);
   const sql = queryBuilder.selectAll(table);
+  const mapRecords = utils.getMapRecords(type);
   queryAsync(sql)
-  .then(records => utils.mapRecords(records, type))
+  .then(mapRecords)
   .then(res.jsonApi)
   .catch(err => res.status(500).send(err.message));
 });
@@ -208,67 +78,86 @@ router.get('/:table', (req, res) => {
 router.get('/:table/:id', (req, res) => {
   const { table, type, id } = queryParams.tableAndId(req);
   const sql = queryBuilder.selectOne(table, id);
+  const mapRecord = utils.getMapRecord(type);
   console.log(sql);
   queryAsync(sql)
   .then(utils.passLog('records'))
-  .then(records => utils.mapRecords(records, type))
-  .then(mapped => (mapped[0]))
+  .then(utils.extractFirstRecord)
+  .then(mapRecord)
   .then(res.jsonApi)
   .catch(err => res.status(500).send(err.message));
 });
 
+function getInsertOrUpdate(query) {
+  return (req, res) => {
+    const { table, type, allAttributes, relationshipAttributes, deferredRelationships } = req.body.data;
+    const selectQuery = queryBuilder.getSelectOne(table);
+    const mapRecord = utils.getMapRecord(type);
+    const performDeferred = utils.getPerformDeferred(table, deferredRelationships);
+    const stripRelAttributes = utils.getStripRelAttributes(relationshipAttributes);
+    const getRecordId = utils.getRecordId(req.params.id);
+    beforeSave(table, allAttributes)
+    .then(query)
+    .then(queryAsync)
+    .then(getRecordId)
+    .then(performDeferred)
+    .then(selectQuery)
+    .then(queryAsync)
+    .then(utils.passLog('#1'))
+    .then(utils.extractFirstRecord)
+    .then(utils.passLog('#1b'))
+    .then(stripRelAttributes)
+    .then(utils.passLog('#2'))
+    .then(mapRecord)
+    .then(utils.passLog('#3'))
+    .then(res.jsonApi)
+    .catch(error => {
+      console.error(error);
+      res.status(500).json({
+        message: error.message,
+        stack: error.stack.split('\n')
+      });
+    });
+  }
+}
+
 // define the home page route
-router.post('/:table', processPayloadRelationships, (req, res) => {
-  const { table, type } = queryParams.tableOnly(req);
-  // console.log(req.body.data);
-  const attributes = req.body.data.attributes;
-  const relationships = req.relationships; // processPayloadRelationships(table, req.body.data.relationships);
-  // const immediate = _.find(relationships, { deferred: false });
-  // const relAttributes = _.reduce(immediate, (attrs, item) => {
-
-  // }, {});
-  //   immediate.reduce(())
-  relAttributes = relationships.immediate;
-  console.log(relAttributes, relationships.deferred);
-
-  const lowerCamelAttributes = Object.assign({},
-    relAttributes, processAttributes( attributes, { create: true } )
-  );
-  chain(beforeCreate(table, lowerCamelAttributes))
-  .then(finalAttributes => queryBuilder.insert(table, finalAttributes))
-  .then(queryAsync)
-  .then(({ insertId }) => (insertId))
-  .set('insertId')
-  .then(insertId => performDeferred(table, insertId, relationships.deferred))
-  .then(utils.passLog('deferred results'))
-  .get( ({insertId}) => queryBuilder.selectOne(table, insertId))
-  .then(queryAsync)
-  .then(records => utils.mapRecords(records, type))
-  .then(mapped => (mapped[0]))
-  .then( res.jsonApi )
-  .catch(err => res.status(500).send(err.message));
+router.post('/:table',
+  middlewares.extractTableAndType,
+  middlewares.convertAttributes,
+  middlewares.extractReqRelationships,
+  (req, res) => {
+    const { table } = req.body.data;
+    const insertQuery = queryBuilder.getInsert(table);
+    const insertOrUpdate = getInsertOrUpdate(insertQuery);
+    return insertOrUpdate(req, res);
 } );
 
 function patchOrPut(req, res) {
-  const id = req.params.id;
-  // const type = req.params.type;
-  // const objType = _.titleize( _.singularize( type ) );
-  const { table, type } = queryParams.tableOnly(req);
-  const attributes = req.body.data.attributes;
-  relAttributes = req.relationships.immediate;
-  const processedAttrs = processAttributes( attributes );
-  const lowerCamelAttributes = Object.assign({},
-    relAttributes, processedAttrs
-  );
-  return queryAsync(queryBuilder.updateOne(table, id, lowerCamelAttributes))
-  .then(() => performDeferred(table, id, req.relationships.deferred))
-  .then(() => queryBuilder.selectOne(table, id))
-  .then(queryAsync)
-  .then(records => utils.mapRecords(records, type))
-  .then(utils.passLog('records'))
-  .then(mapped => (mapped[0]))
-  .then( res.jsonApi )
-  .catch(err => res.status(500).send(err.message));
+    const { table } = req.body.data;
+    const updateQuery = queryBuilder.getUpdateOne(table, req.params.id);
+    const insertOrUpdate = getInsertOrUpdate(updateQuery);
+    return insertOrUpdate(req, res);
+  // const id = req.params.id;
+  // // const type = req.params.type;
+  // // const objType = _.titleize( _.singularize( type ) );
+  // const { table, type } = queryParams.tableOnly(req);
+  // const attributes = req.body.data.attributes;
+  // const { relationships } = req.body.data;
+  // relAttributes = relationships.immediate;
+  // const processedAttrs = processAttributes( attributes );
+  // const lowerCamelAttributes = Object.assign({},
+  //   relAttributes, processedAttrs
+  // );
+  // return queryAsync(queryBuilder.updateOne(table, id, lowerCamelAttributes))
+  // .then(() => performDeferred(table, id, req.relationships.deferred))
+  // .then(() => queryBuilder.selectOne(table, id))
+  // .then(queryAsync)
+  // .then(records => utils.mapRecords(records, type))
+  // .then(utils.passLog('records'))
+  // .then(mapped => (mapped[0]))
+  // .then( res.jsonApi )
+  // .catch(err => res.status(500).send(err.message));
 
   // new models[objType]({ id }).save( processedAttrs )
   // .then( record => { console.log( '## updated'); console.log(record); return record; } )
@@ -276,8 +165,18 @@ function patchOrPut(req, res) {
   // .then( res.jsonApi );
 }
 // define the home page route
-router.patch('/:table/:id', processPayloadRelationships, patchOrPut);
-router.put('/:table/:id', processPayloadRelationships, patchOrPut);
+router.patch('/:table/:id',
+  middlewares.extractTableAndType,
+  middlewares.convertAttributes,
+  middlewares.extractReqRelationships,
+  patchOrPut
+);
+router.put('/:table/:id',
+  middlewares.extractTableAndType,
+  middlewares.convertAttributes,
+  middlewares.extractReqRelationships,
+  patchOrPut
+);
 module.exports = router;
 
 
@@ -303,18 +202,6 @@ function twoDigits(d) {
 Date.prototype.toMysqlFormat = function() {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };
-
-function processAttributes( attributes, options ) {
-  let updatedAt = new Date().toMysqlFormat();
-  let outputAttrs = Object.assign( {},
-    utils.lowerCamelAttributes( attributes ),
-    { updatedAt }
-  );
-  if( options && options.create ) {
-    outputAttrs.createdAt = updatedAt;
-  }
-  return outputAttrs;
-}
 
 
 

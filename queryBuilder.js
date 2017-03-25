@@ -9,27 +9,45 @@ function selectAll(table) {
 
 function selectOne(table, id) {
   return squel.select()
+  .from(table)
+  .field('*')
+  .where("id = ?", id)
+  .toString();
+}
+
+function getSelectOne(table) {
+  return id => {
+    return squel.select()
     .from(table)
     .field('*')
     .where("id = ?", id)
     .toString();
+  }
 }
 
-function insert(table, attributes) {
-  attributes = Array.isArray(attributes) ? attributes : [attributes];
-  return squel.insert()
+function getInsert(table) {
+  return attributes => {
+    attributes = Array.isArray(attributes) ? attributes : [attributes];
+    return squel.insert()
     .into(table)
     .setFieldsRows(attributes)
     .toString();
+  }
 }
 
 function updateOne(table, id, attributes) {
   console.log('### updateOne', attributes);
-  return squel.update()
-    .table(table)
-    .setFields(attributes)
-    .where('id = ' + id)
-    .toString();
+
+}
+
+function getUpdateOne(table, id) {
+  return attributes => {
+    return squel.update()
+      .table(table)
+      .setFields(attributes)
+      .where('id = ' + id)
+      .toString();
+  }
 }
 // describe('squel query', () => {
   
@@ -45,4 +63,4 @@ function updateOne(table, id, attributes) {
 
 // });
 
-module.exports = { selectAll, selectOne, insert, updateOne };
+module.exports = { selectAll, selectOne, getSelectOne, getInsert, getUpdateOne };

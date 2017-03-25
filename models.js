@@ -98,7 +98,7 @@ var User = sequelize.define('user', {
 );
 
 
-User.beforeCreate = function(attributes) {
+User.beforeSave = function(attributes) {
   return new Promise((resolve, reject) => {
     return bcrypt.genSaltAsync(SALT_WORK_FACTOR)
     .then(salt => bcrypt.hashAsync(attributes.password, salt))
@@ -128,7 +128,7 @@ var Ride = sequelize.define('ride', {
 Ride.belongsTo(User, {
   foreignKey: 'userId'
 });
-Ride.beforeCreate = function(attributes) {
+Ride.beforeSave = function(attributes) {
   return new Promise((resolve, reject) => {
     resolve(attributes);
   });
