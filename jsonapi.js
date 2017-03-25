@@ -96,6 +96,7 @@ function getInsertOrUpdate(query) {
     const performDeferred = utils.getPerformDeferred(table, deferredRelationships);
     const stripRelAttributes = utils.getStripRelAttributes(relationshipAttributes);
     const getRecordId = utils.getRecordId(req.params.id);
+    const setRelationships = utils.getSetRelationships(req.body.data.relationships);
     beforeSave(table, allAttributes)
     .then(query)
     .then(queryAsync)
@@ -103,13 +104,10 @@ function getInsertOrUpdate(query) {
     .then(performDeferred)
     .then(selectQuery)
     .then(queryAsync)
-    .then(utils.passLog('#1'))
     .then(utils.extractFirstRecord)
-    .then(utils.passLog('#1b'))
     .then(stripRelAttributes)
-    .then(utils.passLog('#2'))
     .then(mapRecord)
-    .then(utils.passLog('#3'))
+    .then(setRelationships)
     .then(res.jsonApi)
     .catch(error => {
       console.error(error);
@@ -134,36 +132,12 @@ router.post('/:table',
 } );
 
 function patchOrPut(req, res) {
-    const { table } = req.body.data;
-    const updateQuery = queryBuilder.getUpdateOne(table, req.params.id);
-    const insertOrUpdate = getInsertOrUpdate(updateQuery);
-    return insertOrUpdate(req, res);
-  // const id = req.params.id;
-  // // const type = req.params.type;
-  // // const objType = _.titleize( _.singularize( type ) );
-  // const { table, type } = queryParams.tableOnly(req);
-  // const attributes = req.body.data.attributes;
-  // const { relationships } = req.body.data;
-  // relAttributes = relationships.immediate;
-  // const processedAttrs = processAttributes( attributes );
-  // const lowerCamelAttributes = Object.assign({},
-  //   relAttributes, processedAttrs
-  // );
-  // return queryAsync(queryBuilder.updateOne(table, id, lowerCamelAttributes))
-  // .then(() => performDeferred(table, id, req.relationships.deferred))
-  // .then(() => queryBuilder.selectOne(table, id))
-  // .then(queryAsync)
-  // .then(records => utils.mapRecords(records, type))
-  // .then(utils.passLog('records'))
-  // .then(mapped => (mapped[0]))
-  // .then( res.jsonApi )
-  // .catch(err => res.status(500).send(err.message));
-
-  // new models[objType]({ id }).save( processedAttrs )
-  // .then( record => { console.log( '## updated'); console.log(record); return record; } )
-  // .then( record => mapRecordToPayload( record, type, attributes ) )
-  // .then( res.jsonApi );
+  const { table } = req.body.data;
+  const updateQuery = queryBuilder.getUpdateOne(table, req.params.id);
+  const insertOrUpdate = getInsertOrUpdate(updateQuery);
+  return insertOrUpdate(req, res);
 }
+
 // define the home page route
 router.patch('/:table/:id',
   middlewares.extractTableAndType,
@@ -202,33 +176,3 @@ function twoDigits(d) {
 Date.prototype.toMysqlFormat = function() {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };
-
-
-
-// http://stackoverflow.com/questions/31095969/how-do-i-do-atomic-update-using-bookshelf-js-model
-function updateResource( req, res ) {
-
-  const objType = tableObjMap[type];
-  const attributes = req.body.data.attributes;
-  const snakedAttrs = Object.assign( {},
-    utils.lowerCamelAttributes(attributes), {
-      // createdAt: new Date().toMysqlFormat(),
-      // updatedAt: new Date().toMysqlFormat()
-  } );
-  const item = new global[objType](snakedAttrs);
-
-  item.save().then(result => {
-    var payload = { data: { id: result.attributes.id, type, attributes } };
-    res.jsonApi(payload);
-  });
-}
-
-// extract path from req
-// extract model name from path
-// extract relationships from model descriptor
-// convert attribute names from score to lower camel
-
-function processPayload(req, res, next) {
-
-}
-

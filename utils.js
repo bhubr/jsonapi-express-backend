@@ -48,6 +48,10 @@ function mapRecord(record, type) {
   return Object.assign({}, { id, type }, { attributes });
 }
 
+function getSetRelationships(relationships) {
+  return record => (Object.assign(record, {relationships}));
+}
+
 function getMapRecords(type) {
   return records => (_.map(records, record => mapRecord(record, type)));
 }
@@ -144,5 +148,6 @@ module.exports = {
   // performDeferred,
   getPerformDeferred,
   extractFirstRecord,
-  getStripRelAttributes
+  getStripRelAttributes,
+  getSetRelationships
 }
