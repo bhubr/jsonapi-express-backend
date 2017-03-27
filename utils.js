@@ -28,15 +28,6 @@ function kebabAttributes(attributes) {
   return newAttrs;
 }
 
-function mapRecords(records, type) {
-  return _.map(records, model => {
-    const id = model.id;
-    delete model.id;
-    const attributes = kebabAttributes(model);
-    return Object.assign({}, { id, type }, { attributes });
-  });
-}
-
 function extractFirstRecord(records) {
   return records[0];
 }
@@ -62,7 +53,6 @@ function getMapRecord(type) {
 
 function getRecordId(id) {
   return queryResult => {
-    console.log('## getRecordId', queryResult, id);
     return id === undefined ? queryResult.insertId : id;
   }
 }
@@ -81,35 +71,34 @@ function getStripRelAttributes(relationshipAttrs) {
     if(keysToStrip.indexOf(key) !== -1) {
       delete carry[key];
     }
-    console.log(carry);
     return carry;
   }, record));
 }
 
-function performDeferred(insertId, deferred) {
-  console.log('##deferred', deferred);
-  var promises = [];
-  for (var pivotTable in deferred) {
-    const { thisFirst, relTable,ids } = deferred[pivotTable];
-    const thisType = _.singularize(table);
-    const relType  = _.singularize(relTable);
-    const values =  _.reduce(ids, (prev, id) => {
-      let obj = {};
-      obj[thisType + 'Id'] = insertId;
-      obj[relType + 'Id'] = id;
-      return prev.concat(obj);
-    }, []);
-    console.log(values);
-    promises.push(queryBuilder.insert(pivotTable, values));
-    //const thisIds = _.times(ids.length, insertId);
-    // const values = thisFirst ? _.reduce((ids, (prev, id) => { prev.push(insertId) }, []);
-  }
-  return Promise.all(promises)
-  .then(passLog('queries:'))
-  .then(queries => Promise.map(queries, function(query) {
-    return queryAsync(query);
-  }));
-}
+// function performDeferred(insertId, deferred) {
+//   console.log('##deferred', deferred);
+//   var promises = [];
+//   for (var pivotTable in deferred) {
+//     const { thisFirst, relTable,ids } = deferred[pivotTable];
+//     const thisType = _.singularize(table);
+//     const relType  = _.singularize(relTable);
+//     const values =  _.reduce(ids, (prev, id) => {
+//       let obj = {};
+//       obj[thisType + 'Id'] = insertId;
+//       obj[relType + 'Id'] = id;
+//       return prev.concat(obj);
+//     }, []);
+//     console.log(values);
+//     promises.push(queryBuilder.insert(pivotTable, values));
+//     //const thisIds = _.times(ids.length, insertId);
+//     // const values = thisFirst ? _.reduce((ids, (prev, id) => { prev.push(insertId) }, []);
+//   }
+//   return Promise.all(promises)
+//   .then(passLog('queries:'))
+//   .then(queries => Promise.map(queries, function(query) {
+//     return queryAsync(query);
+//   }));
+// }
 
 function getPerformDeferred(table, deferredRelationships) {
   return insertId => {
