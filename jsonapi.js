@@ -113,7 +113,13 @@ router.get('/:table/:id',
   .then(mapRecord)
   .then(getRelationships)
   .then(res.jsonApi)
-  .catch(err => res.status(500).send(err.message));
+  .catch(error => {
+    console.error(error);
+    res.status(500).json({
+      message: error.message,
+      stack: error.stack.split('\n')
+    });
+  });
 });
 
 function getInsertOrUpdate(query) {

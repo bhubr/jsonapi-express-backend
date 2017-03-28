@@ -58,12 +58,13 @@ function getRecordId(id) {
   }
 }
 
-function mapRelationship(entry, type) {
-  return { id: '' + entry.id, type };
+function mapRelationship(entry, type, pkName) {
+  return { id: '' + entry[pkName], type };
 }
 
-function mapRelationships(entries, type) {
-  return entries.map(entry => mapRelationship(entry, type));
+function mapRelationships(entries, type, pkName) {
+  pkName = pkName ? pkName : 'id';
+  return entries.map(entry => mapRelationship(entry, type, pkName));
 }
 
 function getStripRelAttributes(relationshipAttrs) {
@@ -100,7 +101,7 @@ function getStripRelAttributes(relationshipAttrs) {
 //     return queryAsync(query);
 //   }));
 // }
-function getIds(thisFirst, thisType, relType) {
+function getIdFields(thisFirst, thisType, relType) {
   if (thisType !== relType) {
     return [thisType + 'Id', relType + 'Id'];
   }
@@ -119,7 +120,7 @@ function getPerformDeferred(table, queryAsync, deferredRelationships) {
       }
       const thisType = _.singularize(table);
       const relType  = _.singularize(relateeTable);
-      const [fieldId1, fieldId2] = getIds(thisFirst, thisType, relType);
+      const [fieldId1, fieldId2] = getIdFields(thisFirst, thisType, relType);
       const values =  _.reduce(ids, (prev, id) => {
         let obj = {};
         obj[fieldId1] = insertId;
@@ -156,6 +157,7 @@ module.exports = {
   getRecordId,
   mapRecord,
   passLog,
+  getIdFields,
   getPerformDeferred,
   extractFirstRecord,
   getStripRelAttributes,

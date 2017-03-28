@@ -93,6 +93,17 @@ function getGetGetRelationships(map) {
           queries.push(query);
           paramSets.push({ key, single: false, type: mapEntry.table });
         }
+        if(mapEntry.type === 'hasMany' && revEntry.type === 'hasMany') {
+          const relateeTable = mapEntry.table;
+          const thisType = _.singularize(table);
+          const relType  = _.singularize(relateeTable);
+          const { pivotTable, thisFirst } = getPivotTable(key, table, mapEntry.reverse, mapEntry.table);
+          const [fieldId1, fieldId2] = utils.getIdFields(thisFirst, thisType, relType);
+          const query = queryBuilder.selectRelatees(pivotTable, fieldId1, record.id);
+          console.log('## many2many', key, pivotTable, fieldId1, fieldId2, query);
+          queries.push(query);
+          paramSets.push({ key, single: false, type: mapEntry.table, pkName: fieldId2 });
+        }
       });
       return Promise.map(queries, query => {
         return queryAsync(query);
@@ -100,7 +111,8 @@ function getGetGetRelationships(map) {
       .then(results => {
         results.forEach((result, index) => {
           const { key, single, type } = paramSets[index];
-          const mapped = utils.mapRelationships(result, type);
+          const pkName = paramSets[index].pkName ? paramSets[index].pkName : 'id';
+          const mapped = utils.mapRelationships(result, type, pkName);
           const data = single ? mapped[0] : mapped;
           record.relationships[key] = { data };
         });
