@@ -9,6 +9,8 @@ const router = express.Router();
 const queryParams = require('./queryParams');
 const queryBuilder = require('./queryBuilder');
 const SALT_WORK_FACTOR = 10;
+const Chance = require('chance');
+const chance = new Chance();
 
 // function createWithBefore(Model, attributes) {
 //   // return new Promise((resolve, reject) => {
@@ -25,15 +27,17 @@ const SALT_WORK_FACTOR = 10;
 //     }
 //   // });
 // }
+function hashPasswordAsync(password) {
+  return bcrypt.genSaltAsync(SALT_WORK_FACTOR)
+  .then(salt => bcrypt.hashAsync(password, salt));
+}
 
 const beforeSaveHooks = {
   users: function(attributes) {
     return new Promise((resolve, reject) => {
-      return bcrypt.genSaltAsync(SALT_WORK_FACTOR)
-      .then(salt => bcrypt.hashAsync(attributes.password, salt))
-      .then(hash => {
-        resolve(Object.assign(attributes, { password: hash }));
-      })
+      return hashPasswordAsync(attributes.password)
+      .then(password => Object.assign(attributes, { password }))
+      .then(resolve)
       .catch(reject);
     });
   }
@@ -59,6 +63,30 @@ var connection = mysql.createConnection({
 connection.connect();
 const queryAsync = Promise.promisify(connection.query.bind(connection));
 
+// Randomize users... run only once
+// queryAsync(queryBuilder.selectAll('users'))
+// .then(users => {
+//   const promises = users.map(user => {
+//     if(user.email === 'benoithubert@gmail.com') {
+//       return hashPasswordAsync('toto')
+//       .then(password => queryBuilder.updateOne('users', user.id, { password }))
+//       .then(queryAsync);
+//     }
+//     else {
+//       return queryAsync(
+//         queryBuilder.updateOne('users', user.id, {
+//           firstName: chance.first(),
+//           lastName: chance.last(),
+//           email: chance.email()
+//         })
+//       );
+//     }
+//   });
+//   return Promise.all(promises)
+//   .then(results => {
+//     console.log(results);
+//   });
+// });
 
 
 /**

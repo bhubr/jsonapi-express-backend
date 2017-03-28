@@ -60,18 +60,15 @@ function insert(table, attributes) {
 }
 
 function updateOne(table, id, attributes) {
-  console.log('### updateOne', attributes);
-
+  return squel.update()
+    .table(table)
+    .setFields(attributes)
+    .where('id = ' + id)
+    .toString();
 }
 
 function getUpdateOne(table, id) {
-  return attributes => {
-    return squel.update()
-      .table(table)
-      .setFields(attributes)
-      .where('id = ' + id)
-      .toString();
-  }
+  return attributes => updateOne(table, id, attributes);
 }
 // describe('squel query', () => {
   
@@ -87,4 +84,4 @@ function getUpdateOne(table, id) {
 
 // });
 
-module.exports = { selectAll, selectOne, selectRelatees, getSelectOne, insert, getInsert, getUpdateOne };
+module.exports = { selectAll, selectOne, selectRelatees, getSelectOne, insert, getInsert, updateOne, getUpdateOne };
