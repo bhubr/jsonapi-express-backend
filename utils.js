@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const Promise = require('bluebird');
+const queryBuilder = require('./queryBuilder');
 
 function lowerCamelAttributes(attributes) {
   var newAttrs = {};
@@ -99,37 +100,48 @@ function getStripRelAttributes(relationshipAttrs) {
 //     return queryAsync(query);
 //   }));
 // }
+function getIds(thisFirst, thisType, relType) {
+  if (thisType !== relType) {
+    return [thisType + 'Id', relType + 'Id'];
+  }
+  return thisFirst ?
+    [thisType + 'Id1', thisType + 'Id2'] :
+    [thisType + 'Id2', thisType + 'Id1'];
+}
 
-function getPerformDeferred(table, deferredRelationships) {
+function getPerformDeferred(table, queryAsync, deferredRelationships) {
   return insertId => {
-    var promises = [];
+    var queries = [];
     for (var pivotTable in deferredRelationships) {
-      const { thisFirst, ids } = deferredRelationships[pivotTable];
+      const { thisFirst, relateeTable, ids } = deferredRelationships[pivotTable];
+      if(ids.length === 0) {
+        continue;
+      }
       const thisType = _.singularize(table);
-      const relType  = _.singularize(relTable);
+      const relType  = _.singularize(relateeTable);
+      const [fieldId1, fieldId2] = getIds(thisFirst, thisType, relType);
       const values =  _.reduce(ids, (prev, id) => {
         let obj = {};
-        obj[thisType + 'Id'] = insertId;
-        obj[relType + 'Id'] = id;
+        obj[fieldId1] = insertId;
+        obj[fieldId2] = id;
         return prev.concat(obj);
       }, []);
       console.log(values);
-      promises.push(queryBuilder.insert(pivotTable, values));
+      queries.push(queryBuilder.insert(pivotTable, values));
       //const thisIds = _.times(ids.length, insertId);
       // const values = thisFirst ? _.reduce((ids, (prev, id) => { prev.push(insertId) }, []);
     }
-    return Promise.all(promises)
-    .then(passLog('queries:'))
-    .then(queries => Promise.map(queries, function(query) {
+    console.log('## queries', queries);
+    return Promise.map(queries, function(query) {
       return queryAsync(query);
-    }))
+    })
+    .then(passLog('return from Promise.map'))
     .then(() => (insertId));
   };
 }
 
 function passLog(label) {
   return function(data) {
-    console.log(label, data);
     return data;
   }
 }
@@ -144,7 +156,6 @@ module.exports = {
   getRecordId,
   mapRecord,
   passLog,
-  // performDeferred,
   getPerformDeferred,
   extractFirstRecord,
   getStripRelAttributes,

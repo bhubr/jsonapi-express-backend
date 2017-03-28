@@ -66,7 +66,6 @@ const queryAsync = Promise.promisify(connection.query.bind(connection));
  */
 router.get('/:table', (req, res) => {
   const { table, type } = queryParams.tableOnly(req);
-  console.log('table&type', table, type);
   const sql = queryBuilder.selectAll(table);
   const mapRecords = utils.getMapRecords(type);
   queryAsync(sql)
@@ -76,18 +75,13 @@ router.get('/:table', (req, res) => {
 });
 
 router.get('/:table/:id',
-  // middlewares.extractTableAndTypeGet,
-  // middlewares.getRelationships,
   (req, res) => {
   const { table, type, id } = queryParams.tableAndId(req);
   const sql = queryBuilder.selectOne(table, id);
   const mapRecord = utils.getMapRecord(type);
   const getRelationships = middlewares.getGetRelationships(table, queryAsync);
-  console.log(sql);
   queryAsync(sql)
-  .then(utils.passLog('records'))
   .then(utils.extractFirstRecord)
-  // .then(stripRelAttributes)
   .then(mapRecord)
   .then(getRelationships)
   .then(res.jsonApi)
@@ -99,7 +93,7 @@ function getInsertOrUpdate(query) {
     const { table, type, allAttributes, relationshipAttributes, deferredRelationships } = req.body.data;
     const selectQuery = queryBuilder.getSelectOne(table);
     const mapRecord = utils.getMapRecord(type);
-    const performDeferred = utils.getPerformDeferred(table, deferredRelationships);
+    const performDeferred = utils.getPerformDeferred(table, queryAsync, deferredRelationships);
     const stripRelAttributes = utils.getStripRelAttributes(relationshipAttributes);
     const getRecordId = utils.getRecordId(req.params.id);
     const setRelationships = utils.getSetRelationships(req.body.data.relationships);

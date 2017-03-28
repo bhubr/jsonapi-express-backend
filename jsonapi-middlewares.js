@@ -63,8 +63,8 @@ function objectAssignVarKey(obj, key, val) {
 }
 
 function getPivotTable(objectKey, objectTable, relateeKey, relateeTable) {
-  // console.log(objectKey, objectTable, relateeKey, relateeTable);
-  const thisFirst = objectTable < relateeTable;
+  const thisFirst = objectTable === relateeTable ?
+    objectKey <= relateeKey : objectTable <= relateeTable;
   const pivotTable = thisFirst ?
     objectTable + '_' + relateeTable + '_' + objectKey :
     relateeTable + '_' + objectTable + '_' + relateeKey;
@@ -72,73 +72,42 @@ function getPivotTable(objectKey, objectTable, relateeKey, relateeTable) {
 }
 
 function getGetGetRelationships(map) {
-  // return (req, res, next) => {
-    // const { table } = req.body;
   return (table, queryAsync) => {
     return record => {
-      console.log('### record id', record.id);
-      // if(map[table] === undefined) { 
-      //   return next(new Error('undefined relationships for ' + table));
-      // }
       const relationshipsForType = map[table];
       let deferred = {};
       let queries = [];
       let paramSets = [];
       record.relationships = {};
       _.forOwn(relationshipsForType, (mapEntry, key) => {
-        // console.log(relationship, key);
-        // var mapEntry = relationship[camelKey];
         var revEntry = map[mapEntry.table][mapEntry.reverse];
-        // console.log('\n###', mapEntry, key);
-        console.log(mapEntry, revEntry);
-        // console.log('\n');
         if(mapEntry.type === 'belongsTo' && revEntry.type === 'belongsTo') {
           const relateeId = record.attributes[key + '-id'];
           delete record.attributes[key + '-id'];
-          console.log(record, key + 'Id', relateeId)
           const query = queryBuilder.selectOne(mapEntry.table, relateeId);
           queries.push(query);
-          // deferred[key] = {
-            // query,
-            // single: true
-          // };
           paramSets.push({ key, single: true, type: mapEntry.table });
-          console.log(deferred[key]);
         }
         if(mapEntry.type === 'hasMany' && revEntry.type === 'belongsTo') {
-          const query = queryBuilder.selectRelatee(mapEntry.table, mapEntry.reverse + 'Id', record.id);
+          const query = queryBuilder.selectRelatees(mapEntry.table, mapEntry.reverse + 'Id', record.id);
           queries.push(query);
           paramSets.push({ key, single: false, type: mapEntry.table });
-          // deferred[key] = {
-          //   query,
-          //   single: false
-          // };
-          console.log(deferred[key]);
         }
       });
-      console.log('### before Promise.map');
-      console.log(queries, queryAsync.toString());
       return Promise.map(queries, query => {
         return queryAsync(query);
       })
       .then(results => {
-        console.log('\n\n### results');
-        // console.log(results);
         results.forEach((result, index) => {
-          console.log(result, index);
           const { key, single, type } = paramSets[index];
-          console.log(result, index, key, single);
           const mapped = utils.mapRelationships(result, type);
           const data = single ? mapped[0] : mapped;
           record.relationships[key] = { data };
-          console.log(key, mapped);
         });
         return record;
       })
-      // req.body.deferredRelationships = deferred;
     };
-
-    };
+  };
 }
 
 function getExtractReqRelationships(map) {
@@ -156,9 +125,9 @@ function getExtractReqRelationships(map) {
     req.body.data.relationshipAttributes = {};
     // reduce payload relationships
     let index = 0;
+    console.log(req.body.data.relationships);
     _.forOwn(relationships, (payloadRelationship, payloadKey) => {
       const camelKey = _.lowerFirst(_.camelCase(payloadKey));
-
       // no relationship found in table for this payload key => should trigger an error
       if(relationshipsForType[camelKey] === undefined) {
         return next(new Error(
@@ -166,6 +135,9 @@ function getExtractReqRelationships(map) {
         ));
       }
       const relationshipData = payloadRelationship.data;
+      if(relationshipData === null) {
+        return;
+      }
       var mapEntry = relationshipsForType[camelKey];
       var revEntry = map[mapEntry.table][mapEntry.reverse];
       if( mapEntry.type === 'belongsTo' ) {

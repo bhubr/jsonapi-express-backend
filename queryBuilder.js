@@ -15,7 +15,7 @@ function selectOne(table, id) {
   .toString();
 }
 
-function selectRelatee(table, relateeKey, relateeId) {
+function selectRelatees(table, relateeKey, relateeId) {
   return squel.select()
   .from(table)
   .field('*')
@@ -47,11 +47,16 @@ function getSelectOne(table) {
 function getInsert(table) {
   return attributes => {
     attributes = Array.isArray(attributes) ? attributes : [attributes];
-    return squel.insert()
-    .into(table)
-    .setFieldsRows(attributes)
-    .toString();
+    return insert(table, attributes);
   }
+}
+
+function insert(table, attributes) {
+  attributes = Array.isArray(attributes) ? attributes : [attributes];
+  return squel.insert()
+  .into(table)
+  .setFieldsRows(attributes)
+  .toString();
 }
 
 function updateOne(table, id, attributes) {
@@ -82,4 +87,4 @@ function getUpdateOne(table, id) {
 
 // });
 
-module.exports = { selectAll, selectOne, selectRelatee, getSelectOne, getInsert, getUpdateOne };
+module.exports = { selectAll, selectOne, selectRelatees, getSelectOne, insert, getInsert, getUpdateOne };

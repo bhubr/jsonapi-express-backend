@@ -29,6 +29,7 @@ describe('queryParams', () => {
     const res = queryParams.tableOnly(reqTableOnlyDashed);
     res.table.should.exist;
     res.table.should.equal('carmakes');
+    res.type.should.equal('car-makes');
   });
 
   it('tableAndId should throw if no table is passed', () => {

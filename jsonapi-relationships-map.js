@@ -9,6 +9,16 @@ module.exports = {
       table: 'cars',
       type: 'belongsTo',
       reverse: 'owner'
+    },
+    followers: {
+      table: 'users',
+      type: 'hasMany',
+      reverse: 'followees'
+    },
+    followees: {
+      table: 'users',
+      type: 'hasMany',
+      reverse: 'followers'
     }
   },
   posts: {
