@@ -96,10 +96,18 @@ router.get('/:table', (req, res) => {
   const { table, type } = queryParams.tableOnly(req);
   const sql = queryBuilder.selectAll(table);
   const mapRecords = utils.getMapRecords(type);
+  const getRelationships = middlewares.getGetRelationshipsMulti(table, queryAsync);
   queryAsync(sql)
   .then(mapRecords)
+  .then(getRelationships)
   .then(res.jsonApi)
-  .catch(err => res.status(500).send(err.message));
+  .catch(error => {
+    console.error(error);
+    res.status(500).json({
+      message: error.message,
+      stack: error.stack.split('\n')
+    });
+  });
 });
 
 router.get('/:table/:id',
@@ -107,7 +115,7 @@ router.get('/:table/:id',
   const { table, type, id } = queryParams.tableAndId(req);
   const sql = queryBuilder.selectOne(table, id);
   const mapRecord = utils.getMapRecord(type);
-  const getRelationships = middlewares.getGetRelationships(table, queryAsync);
+  const getRelationships = middlewares.getGetRelationshipsSingle(table, queryAsync);
   queryAsync(sql)
   .then(utils.extractFirstRecord)
   .then(mapRecord)

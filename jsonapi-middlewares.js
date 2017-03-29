@@ -71,7 +71,7 @@ function getPivotTable(objectKey, objectTable, relateeKey, relateeTable) {
   return { pivotTable, thisFirst };
 }
 
-function getGetGetRelationships(map) {
+function getGetGetRelationshipsSingle(map) {
   return (table, queryAsync) => {
     return record => {
       const relationshipsForType = map[table];
@@ -117,6 +117,94 @@ function getGetGetRelationships(map) {
           record.relationships[key] = { data };
         });
         return record;
+      })
+    };
+  };
+}
+
+
+function getGetGetRelationshipsMulti(map) {
+  return (table, queryAsync) => {
+    return records => {
+      console.log('\n\n\n  ######### RELATIONSHIPS FOR TABLE ' + table + ' ######################\n\n')
+      const relationshipsForType = map[table];
+      let deferred = {};
+      let promises = [];
+      let paramSets = [];
+      // record.relationships = {};
+      _.forOwn(relationshipsForType, (mapEntry, key) => {
+        var revEntry = map[mapEntry.table][mapEntry.reverse];
+        if(mapEntry.type === 'belongsTo' && revEntry.type === 'belongsTo') {
+          const relateeIds = records.map(record => ([{id: record.attributes[key + '-id']}]));
+          records.forEach((record, index) => {
+            delete records[index].attributes[key + '-id'];
+          });
+          // const query = queryBuilder.selectIn(mapEntry.table, relateeIds);
+          promises.push(Promise.resolve(relateeIds));
+          console.log('## one2one', key);
+          paramSets.push({ key, single: true, type: mapEntry.table });
+        }
+        else if(mapEntry.type === 'hasMany' && revEntry.type === 'belongsTo') {
+          const recordIds = records.map(record => (record.id));
+          const query = queryBuilder.selectRelateesIn(mapEntry.table, mapEntry.reverse + 'Id', recordIds);
+          promises.push(queryAsync(query));
+          console.log('## one2many', key, query);
+          paramSets.push({ key, single: false, type: mapEntry.table, groupBy: mapEntry.reverse + 'Id' });
+        }
+        else if(mapEntry.type === 'hasMany' && revEntry.type === 'hasMany') {
+          const relateeTable = mapEntry.table;
+          const thisType = _.singularize(table);
+          const relType  = _.singularize(relateeTable);
+          const recordIds = records.map(record => (record.id));
+          const { pivotTable, thisFirst } = getPivotTable(key, table, mapEntry.reverse, mapEntry.table);
+          const [fieldId1, fieldId2] = utils.getIdFields(thisFirst, thisType, relType);
+          const query = queryBuilder.selectRelateesIn(pivotTable, fieldId1, recordIds);
+          console.log('## many2many', key, pivotTable, fieldId1, fieldId2, query);
+          promises.push(queryAsync(query));
+          paramSets.push({ key, single: false, type: mapEntry.table, pkName: fieldId2, groupBy: fieldId1 });
+        }
+      });
+      return Promise.all(promises)
+      .then(results => {
+        records.forEach((record, recIdx) => {
+          records[recIdx].relationships = {};
+        });
+        console.log('\n\n\n  ######### RESULTS FOR TABLE ' + table + ' ######################\n')
+        results.forEach((result, resIdx) => {
+
+          let groupedResult;
+          const { key, single, type, groupBy } = paramSets[resIdx];
+          const pkName = paramSets[resIdx].pkName ? paramSets[resIdx].pkName : 'id';
+          console.log('\n## index', resIdx, key, groupBy ? 'GROUPED BY ' + groupBy : 'DIRECT');
+          if(groupBy) {
+            groupedResult = _.groupBy(result, groupBy);
+          }
+          else console.log(result);
+
+          console.log('\n');
+
+          records.forEach((record, recIdx) => {
+            let thisResult;
+            let data;
+            // "result" is an array of which values respect the same ordering as records
+            if(! groupBy) {
+              thisResult = result[recIdx];
+            }
+            else {
+              thisResult = groupedResult['' + record.id];
+            }
+            if(thisResult) {
+              console.log('result not empty', resIdx, recIdx, record, thisResult);
+              const mapped = utils.mapRelationships(thisResult, type, pkName);
+              data = single ? mapped[0] : mapped;
+            }
+            else {
+              data = single ? null : [];
+            }
+            records[recIdx].relationships[key] = { data };
+          });
+        });
+        return records;
       })
     };
   };
@@ -173,5 +261,6 @@ module.exports = {
   convertAttributes,
   getExtractReqRelationships,
   extractReqRelationships: getExtractReqRelationships(relationshipsMap),
-  getGetRelationships: getGetGetRelationships(relationshipsMap)
+  getGetRelationshipsSingle: getGetGetRelationshipsSingle(relationshipsMap),
+  getGetRelationshipsMulti: getGetGetRelationshipsMulti(relationshipsMap)
 };

@@ -15,11 +15,29 @@ function selectOne(table, id) {
   .toString();
 }
 
+function selectIn(table, ids) {
+  const idsString = ids.join(',');
+  return squel.select()
+  .from(table)
+  .field('*')
+  .where("id IN (" + idsString + ")")
+  .toString();
+}
+
 function selectRelatees(table, relateeKey, relateeId) {
   return squel.select()
   .from(table)
   .field('*')
   .where(relateeKey + " = ?", relateeId)
+  .toString();
+}
+
+function selectRelateesIn(table, relateeKey, relateeIds) {
+  const idsString = relateeIds.join(',');
+  return squel.select()
+  .from(table)
+  .field('*')
+  .where(relateeKey + " IN (" + idsString + ")")
   .toString();
 }
 
@@ -84,4 +102,4 @@ function getUpdateOne(table, id) {
 
 // });
 
-module.exports = { selectAll, selectOne, selectRelatees, getSelectOne, insert, getInsert, updateOne, getUpdateOne };
+module.exports = { selectAll, selectOne, selectIn, selectRelatees, selectRelateesIn, getSelectOne, insert, getInsert, updateOne, getUpdateOne };

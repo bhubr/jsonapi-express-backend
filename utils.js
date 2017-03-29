@@ -59,7 +59,8 @@ function getRecordId(id) {
 }
 
 function mapRelationship(entry, type, pkName) {
-  return { id: '' + entry[pkName], type };
+  return ! entry[pkName] ? null :
+    { id: '' + entry[pkName], type };
 }
 
 function mapRelationships(entries, type, pkName) {
