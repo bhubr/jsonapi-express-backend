@@ -129,6 +129,7 @@ function getPerformDeferred(table, queryAsync, deferredRelationships) {
         return prev.concat(obj);
       }, []);
       console.log(values);
+      queries.push(queryBuilder.deleteWithId(pivotTable, insertId, fieldId1));
       queries.push(queryBuilder.insert(pivotTable, values));
       //const thisIds = _.times(ids.length, insertId);
       // const values = thisFirst ? _.reduce((ids, (prev, id) => { prev.push(insertId) }, []);

@@ -15,10 +15,11 @@ function selectOne(table, id) {
   .toString();
 }
 
-function deleteOne(table, id) {
+function deleteWithId(table, id, idKey) {
+  idKey = idKey !== undefined ? idKey : 'id';
   return squel.delete()
   .from(table)
-  .where("id = ?", id)
+  .where(idKey + " = ?", id)
   .toString();
 }
 
@@ -109,4 +110,4 @@ function getUpdateOne(table, id) {
 
 // });
 
-module.exports = { selectAll, selectOne, selectIn, selectRelatees, selectRelateesIn, getSelectOne, insert, getInsert, updateOne, getUpdateOne, deleteOne };
+module.exports = { selectAll, selectOne, selectIn, selectRelatees, selectRelateesIn, getSelectOne, insert, getInsert, updateOne, getUpdateOne, deleteWithId };

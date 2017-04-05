@@ -175,7 +175,7 @@ router.post('/:table',
 
 router.delete('/:table/:id', (req, res) => {
   const { table, id } = queryParams.tableAndId(req);
-  const query = queryBuilder.deleteOne(table, id);
+  const query = queryBuilder.deleteWithId(table, id);
   return queryAsync(query)
   .then(() => { res.json({ success: true }); });
 });
