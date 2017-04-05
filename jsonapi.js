@@ -177,7 +177,7 @@ router.delete('/:table/:id', (req, res) => {
   const { table, id } = queryParams.tableAndId(req);
   const query = queryBuilder.deleteWithId(table, id);
   return queryAsync(query)
-  .then(() => { res.json({ success: true }); });
+  .then(() => { res.json({ meta: { success: true } }); });
 });
 
 function patchOrPut(req, res) {
