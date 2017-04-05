@@ -173,6 +173,13 @@ router.post('/:table',
     return insertOrUpdate(req, res);
 } );
 
+router.delete('/:table/:id', (req, res) => {
+  const { table, id } = queryParams.tableAndId(req);
+  const query = queryBuilder.deleteOne(table, id);
+  return queryAsync(query)
+  .then(() => { res.json({ success: true }); });
+});
+
 function patchOrPut(req, res) {
   const { table } = req.body.data;
   const updateQuery = queryBuilder.getUpdateOne(table, req.params.id);

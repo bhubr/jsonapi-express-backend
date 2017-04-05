@@ -15,6 +15,13 @@ function selectOne(table, id) {
   .toString();
 }
 
+function deleteOne(table, id) {
+  return squel.delete()
+  .from(table)
+  .where("id = ?", id)
+  .toString();
+}
+
 function selectIn(table, ids) {
   const idsString = ids.join(',');
   return squel.select()
@@ -71,14 +78,14 @@ function getInsert(table) {
 
 function insert(table, attributes) {
   attributes = Array.isArray(attributes) ? attributes : [attributes];
-  return squel.insert()
+  return squel.insert({ replaceSingleQuotes: true })
   .into(table)
   .setFieldsRows(attributes)
   .toString();
 }
 
 function updateOne(table, id, attributes) {
-  return squel.update()
+  return squel.update({ replaceSingleQuotes: true })
     .table(table)
     .setFields(attributes)
     .where('id = ' + id)
@@ -102,4 +109,4 @@ function getUpdateOne(table, id) {
 
 // });
 
-module.exports = { selectAll, selectOne, selectIn, selectRelatees, selectRelateesIn, getSelectOne, insert, getInsert, updateOne, getUpdateOne };
+module.exports = { selectAll, selectOne, selectIn, selectRelatees, selectRelateesIn, getSelectOne, insert, getInsert, updateOne, getUpdateOne, deleteOne };
