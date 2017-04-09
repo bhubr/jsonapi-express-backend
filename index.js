@@ -1,11 +1,11 @@
 const url = require('url');
-const utils = require('./utils');
 const Promise = require('bluebird');
 let _ = require("lodash");
 _.mixin(require("lodash-inflection"));
 const express = require('express');
 const bcrypt = Promise.promisifyAll(require('bcrypt'));
 const router = express.Router();
+const utils = require('./lib/utils');
 const middlewares = require('./lib/middlewares');
 const queryParams = require('./lib/queryParams');
 const queryBuilder = require('./lib/queryBuilder');
