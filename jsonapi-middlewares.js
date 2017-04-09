@@ -259,6 +259,7 @@ module.exports = {
   extractTableAndTypePostOrPatch,
   extractTableAndTypeGet,
   convertAttributes,
+  processAttributes,
   getExtractReqRelationships,
   extractReqRelationships: getExtractReqRelationships(relationshipsMap),
   getGetRelationshipsSingle: getGetGetRelationshipsSingle(relationshipsMap),

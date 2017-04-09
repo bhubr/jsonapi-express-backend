@@ -15,6 +15,16 @@ function selectOne(table, id) {
   .toString();
 }
 
+function selectWhere(table, where) {
+  let query = squel.select()
+  .from(table)
+  .field('*');
+  for (var key in where) {
+    query = query.where(key + ' = ?', where[key]);
+  }
+  return query.toString();
+}
+
 function deleteWithId(table, id, idKey) {
   idKey = idKey !== undefined ? idKey : 'id';
   return squel.delete()
@@ -110,4 +120,4 @@ function getUpdateOne(table, id) {
 
 // });
 
-module.exports = { selectAll, selectOne, selectIn, selectRelatees, selectRelateesIn, getSelectOne, insert, getInsert, updateOne, getUpdateOne, deleteWithId };
+module.exports = { selectAll, selectOne, selectIn, selectWhere, selectRelatees, selectRelateesIn, getSelectOne, insert, getInsert, updateOne, getUpdateOne, deleteWithId };

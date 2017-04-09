@@ -58,5 +58,6 @@ module.exports = {
       type: 'hasMany',
       reverse: 'carMake'
     }
-  }
+  },
+  accounts: {}
 };

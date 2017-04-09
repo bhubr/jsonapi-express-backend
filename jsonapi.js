@@ -1,3 +1,4 @@
+const url = require('url');
 const utils = require('./utils');
 const middlewares = require('./jsonapi-middlewares');
 const Promise = require('bluebird');
@@ -9,8 +10,11 @@ const router = express.Router();
 const queryParams = require('./queryParams');
 const queryBuilder = require('./queryBuilder');
 const SALT_WORK_FACTOR = 10;
+const chain = require('store-chain');
 const Chance = require('chance');
 const chance = new Chance();
+// const repoApiTools = require('../express-myprojects/tools/codeRepoAPIs');
+// const creds = require('../express-myprojects/tools/cred.json');
 
 // function createWithBefore(Model, attributes) {
 //   // return new Promise((resolve, reject) => {
@@ -48,7 +52,6 @@ function beforeSave(table, attributes) {
   return beforeSaveHooks[table](attributes);
 }
 
-var chain      = require('store-chain');
 var mysql      = require('mysql');
 var config     = require('./config/config.json');
 var env        = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
@@ -94,7 +97,8 @@ const queryAsync = Promise.promisify(connection.query.bind(connection));
  */
 router.get('/:table', (req, res) => {
   const { table, type } = queryParams.tableOnly(req);
-  const sql = queryBuilder.selectAll(table);
+  // console.log('get all', req.query);
+  const sql = queryBuilder.selectWhere(table, req.query);
   const mapRecords = utils.getMapRecords(type);
   const getRelationships = middlewares.getGetRelationshipsMulti(table, queryAsync);
   queryAsync(sql)
@@ -200,7 +204,6 @@ router.put('/:table/:id',
   middlewares.extractReqRelationships,
   patchOrPut
 );
-module.exports = router;
 
 
 function mapRecordToPayload( record, type, attributes ) {
@@ -225,3 +228,9 @@ function twoDigits(d) {
 Date.prototype.toMysqlFormat = function() {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };
+
+
+
+
+
+module.exports = router;
