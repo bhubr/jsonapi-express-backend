@@ -1,14 +1,15 @@
 const url = require('url');
 const utils = require('./utils');
-const middlewares = require('./jsonapi-middlewares');
 const Promise = require('bluebird');
 let _ = require("lodash");
 _.mixin(require("lodash-inflection"));
 const express = require('express');
-var bcrypt = Promise.promisifyAll(require('bcrypt'));
+const bcrypt = Promise.promisifyAll(require('bcrypt'));
 const router = express.Router();
-const queryParams = require('./queryParams');
-const queryBuilder = require('./queryBuilder');
+const middlewares = require('./lib/middlewares');
+const queryParams = require('./lib/queryParams');
+const queryBuilder = require('./lib/queryBuilder');
+const authToken = require('./lib/authToken');
 const SALT_WORK_FACTOR = 10;
 const chain = require('store-chain');
 const Chance = require('chance');
@@ -165,6 +166,28 @@ function getInsertOrUpdate(query) {
   }
 }
 
+router.post('/signin', (req, res) => {
+  const { email, password } = req.body.data.attributes;
+  const selectUserQuery = queryBuilder.selectWhere('users', { email });
+  queryAsync(selectUserQuery)
+  .then(users => {
+    console.log(users);
+    if (!users.length) {
+      return res.status(401).send('no account with this email');
+    }
+    const user = users[0];
+    bcrypt.compareAsync(user.password, password)
+    // .then(() => user.getPermissions())
+    .then(() => authToken.generate(user))
+    .then(jwt => (res.jsonApi({ userId: user.id, jwt })));
+  })
+  .catch(err => {
+    console.log(err);
+      // return done(null, false, { message: 'Incorrect password => ' + err });
+      return res.status(401).send(err);
+    });
+});
+
 // define the home page route
 router.post('/:table',
   middlewares.extractTableAndTypePostOrPatch,
@@ -204,7 +227,6 @@ router.put('/:table/:id',
   middlewares.extractReqRelationships,
   patchOrPut
 );
-
 
 function mapRecordToPayload( record, type, attributes ) {
   return { id: record.id, type, attributes };
