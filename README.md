@@ -1,6 +1,13 @@
 # JSONAPI Express.js / MySQL backend
 
-**Fair bit of warning**: this is work in progress, and not production-ready (yet). That being said, it does the job, for me at least :).
+## Fair bit of warning
+
+This is work in progress, and not production-ready (yet). That being said, it does the job, for me at least :).
+
+**Please** don't hesitate to contact me if you run into issues while giving this project a try. As I am currently working on it heavily, I will definitely answer your request.
+Besides, documentation is on its way, a user guide will be provided soon.
+
+## About this project
 
 This project began as a standalone Express app, that I just started turning into an [NPM module](https://www.npmjs.com/package/jsonapi-express-backend).
 
