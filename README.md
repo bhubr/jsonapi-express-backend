@@ -6,7 +6,10 @@ This project began as a standalone Express app, that I just started turning into
 
 The motivation for it is to have a simple-to-use backend for [Ember.js](https://emberjs.com).
 
-An example project, demonstrating how to is available at [https://github.com/bhubr/jsonapi-express-backend-demo](https://github.com/bhubr/jsonapi-express-backend-demo).
+An example project is available at [https://github.com/bhubr/jsonapi-express-backend-demo](https://github.com/bhubr/jsonapi-express-backend-demo). It demonstrates how to configure the module by providing those parameters:
+- public&private keys path
+- db settings
+- model relationships descriptors
 
 ## Install
 
