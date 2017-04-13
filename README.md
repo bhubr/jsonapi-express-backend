@@ -2,7 +2,7 @@
 
 ## Live demo
 
-A simple blog app: [https://ember-blog.info/contact](https://ember-blog.info/contact). **It still has many bugs** (like: no redirection after login) but should work. [Feedback](https://ember-blog.info/contact) is welcome.
+A simple blog app: [https://ember-blog.info/](https://ember-blog.info/). **It still has many bugs** (like: no redirection after login) but should work. [Feedback](https://ember-blog.info/contact) is welcome.
 
 Backend code for this demo app is [here](https://github.com/bhubr/jsonapi-express-backend-demo), frontend code is [here](https://github.com/bhubr/ember-blog).
 
