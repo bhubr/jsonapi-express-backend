@@ -1,7 +1,7 @@
 {
   "name": "jsonapi-express-backend",
   "license": "WTFPL",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "repository": "https://github.com/",
   "description": "Track projects and time with Express and AngularJS",
   "files": ["index.js", "lib"],

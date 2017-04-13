@@ -1,10 +1,16 @@
 # JSONAPI Express.js / MySQL backend
 
+## Live demo
+
+A simple blog app: [https://ember-blog.info/contact](https://ember-blog.info/contact). **It still has many bugs** (like: no redirection after login) but should work. [Feedback](https://ember-blog.info/contact) is welcome.
+
+Backend code for this demo app is [here](https://github.com/bhubr/jsonapi-express-backend-demo), frontend code is [here](https://github.com/bhubr/ember-blog).
+
 ## Fair bit of warning
 
 This is work in progress, and not production-ready (yet). That being said, it does the job, for me at least :).
 
-**Please** don't hesitate to contact me if you run into issues while giving this project a try. As I am currently working on it heavily, I will definitely answer your request.
+**Please** don't hesitate to [contact me](https://ember-blog.info/contact) if you run into issues while giving this project a try. As I am currently working on it heavily, I will definitely answer your request.
 Besides, documentation is on its way, a user guide will be provided soon.
 
 ## About this project
