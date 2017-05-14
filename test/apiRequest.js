@@ -19,8 +19,7 @@ module.exports = function(app) {
     if(jwt) {
       headers.Authorization = 'Bearer ' + jwt
     }
-    return request(app)
-      .post(url)
+    return request(app)[method](url)
       .set(headers)
       .send({ data });
   }
@@ -43,10 +42,7 @@ module.exports = function(app) {
    * PUT to backend
    */
   function put(url, data, jwt) {
-    return request(app)
-      .get(url)
-      .set('Accept', 'application/json')
-      .set('Content-Type', 'application/json');
+    return send('put', url, data, jwt);
   }
 
   /**
@@ -72,5 +68,5 @@ module.exports = function(app) {
     .then(res => (res.body.data));
   }
 
-  return { post, get, getUserPayload, signupAndLogin };
+  return { post, put, get, getUserPayload, signupAndLogin };
 };

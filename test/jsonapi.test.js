@@ -60,20 +60,16 @@ describe('JSON API requests', () => {
       api.signupAndLogin(),
       api.signupAndLogin()
     ])
-    .then(([data1, data2]) => {
-      console.log(data1, data2);
-    });
-    // const payload = getUserPayload();
-    // const { email } = payload.attributes;
+    .then(([data1, data2]) => api.put(
+      '/api/v1/users/' + data2.userId,
+      { id: data2.userId, type: 'users', attributes: { email: 'hacked.email@example.com' } },
+      data1.jwt
+    // ))
+    ).expect(200))
     // .then(res => {
-    //   const { data } = res.body;
-    //   const { id, type, attributes } = data;
-    //   expect(data).to.not.be.undefined;
-    //   expect(attributes).to.not.be.undefined;
-    //   expect(type).to.equal('users');
-    //   expect(attributes.email).to.equal(email);
-    //   expect(Number.isInteger(id)).to.be.true;
-    // });
+    //   console.log(res.body)
+    // })
+    ;
   });
 
 });
