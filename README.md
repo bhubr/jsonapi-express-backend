@@ -51,4 +51,9 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - Unique email and username in users table
 - Prevent from removing email and password from user's required attrs
 - Allow only admins to override roleId on user
+- Pre checks on app start: existing roles and permissions, etc.
+- ~~Move default user role set on beforeSave ? NO, just after!~~
+- Remove role relationship from payload unless user has permission to modify/create user
+- on update, what does JSONAPI spec say? can we update just a subset of the attrs?
+- in future event emitter: on update, fire an event with just the modified fields (so that we can perform custom actions if this or that field is changed)
 - More issues on [project issue tracker](https://github.com/bhubr/jsonapi-express-backend/issues)

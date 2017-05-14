@@ -2,9 +2,12 @@ const chai = require('chai');
 const httpMocks = require('node-mocks-http');
 const should = chai.should();
 const expect = chai.expect;
+const chain = require('store-chain');
+const Promise = require('bluebird');
 // const request = require('supertest');
 let api;
 // let app;
+
 
 describe('JSON API requests', () => {
 
@@ -15,14 +18,10 @@ describe('JSON API requests', () => {
     api = require('./apiRequest')(app);
   });
 	
-  it('creates a user #2', () => {
-    return api.post('/api/v1/users', {
-      type: 'users',
-      attributes: {
-        email: 'joe@example.com',
-        password: 'foobar'
-      }
-    })
+  it('creates a user', () => {
+    const payload = api.getUserPayload();
+    const { email } = payload.attributes;
+    return api.post('/api/v1/users', payload)
     .expect(200)
     .then(res => {
       const { data } = res.body;
@@ -30,9 +29,51 @@ describe('JSON API requests', () => {
       expect(data).to.not.be.undefined;
       expect(attributes).to.not.be.undefined;
       expect(type).to.equal('users');
-      expect(attributes.email).to.equal('joe@example.com');
+      expect(attributes.email).to.equal(email);
       expect(Number.isInteger(id)).to.be.true;
     });
+  });
+
+  
+  it('creates a user then signs in', () => {
+    const payload = api.getUserPayload();
+    const { email } = payload.attributes;
+    return chain(api.post('/api/v1/users', payload))
+    .then(res => (res.body.data.id))
+    .set('userId')
+    .then(() => api.post('/api/v1/signin', payload))
+    .then(res => {
+      const { data } = res.body;
+      const { id, type, attributes } = data;
+      expect(data).to.not.be.undefined;
+      return data;
+    })
+    .set('data')
+    .get(({ userId, data}) => {
+      expect(data.userId).to.equal(userId);
+      expect(data.jwt).to.not.be.undefined;
+    });
+  });
+
+  it('creates two users and attempt to modify second with first', () => {
+    return Promise.all([
+      api.signupAndLogin(),
+      api.signupAndLogin()
+    ])
+    .then(([data1, data2]) => {
+      console.log(data1, data2);
+    });
+    // const payload = getUserPayload();
+    // const { email } = payload.attributes;
+    // .then(res => {
+    //   const { data } = res.body;
+    //   const { id, type, attributes } = data;
+    //   expect(data).to.not.be.undefined;
+    //   expect(attributes).to.not.be.undefined;
+    //   expect(type).to.equal('users');
+    //   expect(attributes.email).to.equal(email);
+    //   expect(Number.isInteger(id)).to.be.true;
+    // });
   });
 
 });
