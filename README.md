@@ -48,4 +48,7 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - Allow filtering of the returned fields.
 - Export queryBuilder, queryAsync, utils, etc. from index.js
 - ~~Implement refresh of the JWT~~ (done).
+- Unique email and username in users table
+- Prevent from removing email and password from user's required attrs
+- Allow only admins to override roleId on user
 - More issues on [project issue tracker](https://github.com/bhubr/jsonapi-express-backend/issues)

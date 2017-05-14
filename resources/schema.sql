@@ -30,10 +30,12 @@ CREATE TABLE `role_permission` (
   `permissionId` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
--- ALTER TABLE `users`
---   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`roleId`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`roleId`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- Used when I needed to temporarily disable the need to have a pre-existing role
 -- ALTER TABLE `users`
 --   DROP FOREIGN KEY `users_ibfk_1`;
+
 ALTER TABLE `role_permission`
   ADD PRIMARY KEY (`roleId`,`permissionId`);
 
