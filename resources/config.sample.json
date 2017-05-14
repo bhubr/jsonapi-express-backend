@@ -1,0 +1,21 @@
+{
+  "testing": {
+    "db": {
+      "username": "root",
+      "password": "",
+      "database": "jsonapi_express_backend_test",
+      "host": "127.0.0.1",
+      "dialect": "mysql"
+    },
+    "keys": {
+      "private": "keys/private.key",
+      "public": "keys/public.key"
+    },
+    "email": {
+      "adminEmail": "johndoe@example.com",
+      "mailgunLogin": "YOUR.MAILGUN.LOGIN",
+      "mailgunPass": "YOUR.MAILGUN.PASS"
+    },
+    "whitelistedUrls": ["GET /api/v1/users*"]
+  }
+}

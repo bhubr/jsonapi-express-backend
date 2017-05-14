@@ -46,4 +46,6 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - Don't query *all* the fields for relationships when I need only the id.
 - Implement an "event hub" and fire events on DB record creation/update/deletion.
 - Allow filtering of the returned fields.
-- Implement refresh of the JWT.
+- Export queryBuilder, queryAsync, utils, etc. from index.js
+- ~~Implement refresh of the JWT~~ (done).
+- More issues on [project issue tracker](https://github.com/bhubr/jsonapi-express-backend/issues)

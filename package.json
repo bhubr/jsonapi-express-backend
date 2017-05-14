@@ -1,14 +1,16 @@
 {
   "name": "jsonapi-express-backend",
   "license": "WTFPL",
-  "version": "0.3.14",
-  "repository": "https://github.com/",
-  "description": "Track projects and time with Express and AngularJS",
-  "files": ["index.js", "lib"],
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/bhubr/jsonapi-express-backend.git"
+  "version": "0.4.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bhubr/jsonapi-express-backend.git"
   },
+  "description": "JSONAPI backend based on Express and MySQL",
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "dependencies": {
     "bcrypt": "^1.0.2",
     "bluebird": "^3.4.7",
@@ -26,6 +28,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
-    "node-mocks-http": "^1.6.1"
+    "node-mocks-http": "^1.6.1",
+    "supertest": "^3.0.0"
   }
 }
