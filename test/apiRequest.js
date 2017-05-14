@@ -1,13 +1,17 @@
 const request = require('supertest');
 const Chance = require('chance');
 const chance = new Chance();
+const Promise = require('bluebird');
 
 module.exports = function(app) {
 
   /**
    * POST to backend
    */
-  function post(url, data, jwt) {
+  function send(method, url, data, jwt) {
+    if(['post', 'put', 'patch'].indexOf(method) === -1) {
+      return Promise.reject(new Error('Unknown method ' + method));
+    }
     let headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
@@ -19,6 +23,10 @@ module.exports = function(app) {
       .post(url)
       .set(headers)
       .send({ data });
+  }
+
+  function post(url, data, jwt) {
+    return send('post', url, data, jwt);
   }
 
   /**
