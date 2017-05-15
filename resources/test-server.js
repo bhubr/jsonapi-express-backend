@@ -13,14 +13,12 @@ const port = config.port || 3333;
  * Setup Express
  */
 const app = express();
-app.use(morgan('tiny'));
+// app.use(morgan('tiny'));
 app.use(express.static('public'));
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use('/api/v1', middlewares.checkJwt);
 app.use('/api/v1', middlewares.jsonApi);
 app.use('/api/v1', router);
 
-app.listen(port, function () {
-  console.log('Example app listening on port ' + port + ' (env: ' + env + ')');
-});
+app.listen(port);
 module.exports = app;

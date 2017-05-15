@@ -7,7 +7,10 @@ const Promise = require('bluebird');
 // const request = require('supertest');
 let api;
 // let app;
-const ts = ((new Date()).getTime()).toString(36);
+function ts() {
+  return ((new Date()).getTime()).toString(36)
+    + (Math.ceil(100000 * Math.random())).toString(36); 
+}
 
 describe('JSON API requests', () => {
 
@@ -55,21 +58,25 @@ describe('JSON API requests', () => {
     });
   });
 
-  it('creates two users and attempt to modify second with first', () => {
+  it('creates a user, and attempts to modify it', () => {
+    return api.signupAndLogin()
+    .then(data => api.put(
+      '/api/v1/users/' + data.userId,
+      { id: data.userId, type: 'users', attributes: { email: 'modified.email' + ts() + '@example.com' } },
+      data.jwt
+    ).expect(200));
+  });
+
+  it('creates two users, first attempts to modify second but *fails*', () => {
     return Promise.all([
       api.signupAndLogin(),
       api.signupAndLogin()
     ])
     .then(([data1, data2]) => api.put(
       '/api/v1/users/' + data2.userId,
-      { id: data2.userId, type: 'users', attributes: { email: 'hacked.email' + ts + '@example.com' } },
+      { id: data2.userId, type: 'users', attributes: { email: 'hacked.email' + ts() + '@example.com' } },
       data1.jwt
-    // ))
-    ).expect(200))
-    // .then(res => {
-    //   console.log(res.body)
-    // })
-    ;
+    ).expect(403));
   });
 
 });
