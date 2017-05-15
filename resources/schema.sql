@@ -97,3 +97,20 @@ ALTER TABLE `posts_tags_tags`
   ADD CONSTRAINT `posts_tags_tags_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `posts_tags_tags`
   ADD CONSTRAINT `posts_tags_tags_ibfk_2` FOREIGN KEY (`tagId`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+-- Unicity constraints
+ALTER TABLE users
+ADD UNIQUE (email), ADD UNIQUE(username);
+
+ALTER TABLE roles
+ADD UNIQUE(name);
+
+ALTER TABLE permissions
+ADD UNIQUE(name);
+
+
+-- Seed data
+INSERT INTO roles(name) VALUES('Admin'),('User');
+INSERT INTO permissions(name) VALUES('users:read:*'),('users:update:*'),('users:delete:*'),('users:read:self'),('users:update:self'),('users:delete:self');
+INSERT INTO role_permission(roleId, permissionId) VALUES(1,1),(1,2),(1,3),(2,4),(2,5),(2,6);

@@ -7,7 +7,7 @@ const Promise = require('bluebird');
 // const request = require('supertest');
 let api;
 // let app;
-
+const ts = ((new Date()).getTime()).toString(36);
 
 describe('JSON API requests', () => {
 
@@ -62,7 +62,7 @@ describe('JSON API requests', () => {
     ])
     .then(([data1, data2]) => api.put(
       '/api/v1/users/' + data2.userId,
-      { id: data2.userId, type: 'users', attributes: { email: 'hacked.email@example.com' } },
+      { id: data2.userId, type: 'users', attributes: { email: 'hacked.email' + ts + '@example.com' } },
       data1.jwt
     // ))
     ).expect(200))
