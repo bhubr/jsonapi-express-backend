@@ -58,5 +58,9 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - in future event emitter: on update, fire an event with just the modified fields (so that we can perform custom actions if this or that field is changed)
 - "nonces", regenerated on each POST/PUT/PATCH request, and passed down to client which must send it in next request... complicated, furthermore requests can be forged with that too.
 - permissions: e.g. allow a user to remove any comment on a post of his/her. comment belong to another user, but is linked to a post belonging to the user. Also, a comment might be anonymous (hence no user id associated). Other example: a user can't DELETE a tag that is linked to a post of his, but might be linked to other users' posts as well...
-- Fix inconsistencies (i.e. setting type/table on req.body / req.body.data)
+- Fix inconsistencies (i.e. setting type/table on req.body / req.body.data) ==> ** CRITICAL **
+- func checkPermission uses table and should be using type instead (and better, *singular* for type)
+- a user should not be able to delete itself... Or should he???
+- attention! I override req.body.data.type somewhere...
+- check that the payload attributes have proper format (check against model relationships descriptor, then inside check for data, and inside for type and id, then inside for existing entry)
 - More issues on [project issue tracker](https://github.com/bhubr/jsonapi-express-backend/issues)

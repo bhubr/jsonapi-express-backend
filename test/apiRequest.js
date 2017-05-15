@@ -29,20 +29,40 @@ module.exports = function(app) {
   }
 
   /**
-   * GET from backend
-   */
-  function get(url) {
-    return request(app)
-      .get(url)
-      .set('Accept', 'application/json')
-      .set('Content-Type', 'application/json');
-  }
-
-  /**
    * PUT to backend
    */
   function put(url, data, jwt) {
     return send('put', url, data, jwt);
+  }
+
+  function noSend(method, url, jwt) {
+    if(['get', 'delete'].indexOf(method) === -1) {
+      return Promise.reject(new Error('Unknown method ' + method));
+    }
+    let headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+    if(jwt) {
+      headers.Authorization = 'Bearer ' + jwt
+    }
+    return request(app)
+      [method](url)
+      .set(headers);
+  }
+
+  /**
+   * GET from backend
+   */
+  function get(url, jwt) {
+    return noSend('get', url, jwt);
+  }
+
+  /**
+   * DELETE from backend
+   */
+  function _delete(url, jwt) {
+    return noSend('delete', url, jwt);
   }
 
   /**
@@ -58,6 +78,22 @@ module.exports = function(app) {
     };
   }
 
+ function getPostPayload(userId) {
+    return {
+      type: 'posts',
+      attributes: {
+        title: chance.sentence({ words: 3 }),
+        slug: chance.guid(),
+        content: chance.paragraph({ sentences: 2 })
+      },
+      relationships: {
+        author: { data: {
+          type: 'users', id: userId
+        } }
+      }
+    };
+  }
+
   /**
    * Signup then login a fake user
    */
@@ -68,5 +104,13 @@ module.exports = function(app) {
     .then(res => (res.body.data));
   }
 
-  return { post, put, get, getUserPayload, signupAndLogin };
+  function login(credentials) {
+    const { email, password } = credentials;
+    return post('/api/v1/signin', {
+      attributes: { email, password }
+    })
+    .then(res => (res.body.data));
+  }
+
+  return { post, put, get, 'delete': _delete, getUserPayload, getPostPayload, signupAndLogin, login };
 };

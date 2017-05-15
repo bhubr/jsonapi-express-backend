@@ -6,6 +6,7 @@ const chain = require('store-chain');
 const Promise = require('bluebird');
 // const request = require('supertest');
 let api;
+const db = require('./dbTools');
 // let app;
 function ts() {
   return ((new Date()).getTime()).toString(36)
@@ -77,6 +78,22 @@ describe('JSON API requests', () => {
       { id: data2.userId, type: 'users', attributes: { email: 'hacked.email' + ts() + '@example.com' } },
       data1.jwt
     ).expect(403));
+  });
+
+  it('creates a user, then a post', () => {
+    return chain(api.signupAndLogin())
+    .set('credentials')
+    .then(({ jwt, userId }) => api.getPostPayload(userId))
+    .set('payload')
+    .get(({ credentials, payload}) =>
+      api.post('/api/v1/posts', payload, credentials.jwt)
+      .expect(200)
+    )
+    // .then(([admin, user]) => api['delete'](
+    //   '/api/v1/users/' + user.userId,
+    //   admin.jwt
+    // ))
+    // .then(res => { console.log(res.body) });
   });
 
 });

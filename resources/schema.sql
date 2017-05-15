@@ -112,5 +112,5 @@ ADD UNIQUE(name);
 
 -- Seed data
 INSERT INTO roles(name) VALUES('Admin'),('User');
-INSERT INTO permissions(name) VALUES('users:read:*'),('users:update:*'),('users:delete:*'),('users:read:self'),('users:update:self'),('users:delete:self');
-INSERT INTO role_permission(roleId, permissionId) VALUES(1,1),(1,2),(1,3),(2,4),(2,5),(2,6);
+INSERT INTO permissions(name) VALUES('users:read:all'),('users:update:all'),('users:delete:all'),('users:read:self'),('users:update:self');
+INSERT INTO role_permission(roleId, permissionId) VALUES(1,1),(1,2),(1,3),(2,4),(2,5);

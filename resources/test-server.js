@@ -9,6 +9,11 @@ const { router, middlewares, queryBuilder, queryAsync } = require('../index')(__
 
 const port = config.port || 3333;
 
+process.on('uncaughtException', function (err) {
+  console.error(err.stack);
+  console.log("Node NOT Exiting...");
+});
+
 /**
  * Setup Express
  */
