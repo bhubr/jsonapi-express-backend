@@ -7,8 +7,8 @@ CREATE TABLE `users` (
   `updatedAt` datetime DEFAULT NULL,
   `firstName` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `lastName` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `username` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `username` varchar(255) UNIQUE COLLATE utf8_unicode_ci DEFAULT NULL,
+  `email` varchar(255) UNIQUE COLLATE utf8_unicode_ci DEFAULT NULL,
   `website` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `password` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   -- Extra fields (for test purposes)
@@ -17,12 +17,12 @@ CREATE TABLE `users` (
 
 CREATE TABLE `roles` (
   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL
+  `name` varchar(255) UNIQUE COLLATE utf8_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `permissions` (
   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL
+  `name` varchar(255) UNIQUE COLLATE utf8_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `role_permission` (
