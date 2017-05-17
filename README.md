@@ -43,6 +43,13 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 
 ## TODO
 
+- pgsql support
+- localization
+- proper error format in JSONAPI responses
+- enforce that *required* relationships are provided on resource creation
+  (unless we decide to allow empty relationship: http://stackoverflow.com/questions/15082874/how-to-pass-a-null-value-to-a-foreign-key-field)
+- provide an admin backend single-page app, ala Django Admin
+- pagination
 - Don't query *all* the fields for relationships when I need only the id.
 - Implement an "event hub" and fire events on DB record creation/update/deletion.
 - Allow filtering of the returned fields.
