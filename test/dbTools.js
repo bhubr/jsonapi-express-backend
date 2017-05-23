@@ -5,14 +5,15 @@ const configs    = require(path.normalize(__dirname + '/../resources/config.json
 const env        = process.env.NODE_ENV ? process.env.NODE_ENV : 'test';
 const config     = configs[env];
 const dbSettings = config.db;
-const connection = mysql.createConnection({
-  host     : dbSettings.host,
-  user     : dbSettings.username,
-  password : dbSettings.password,
-  database : dbSettings.database
-});
-connection.connect();
-const queryAsync = Promise.promisify(connection.query.bind(connection));
+const wrapper = require('jsonapi-express-backend-query')(dbSettings);
+// const connection = mysql.createConnection({
+//   host     : dbSettings.host,
+//   user     : dbSettings.username,
+//   password : dbSettings.password,
+//   database : dbSettings.database
+// });
+// connection.connect();
+const queryAsync = wrapper.query;
 const queryBuilder = require('../lib/queryBuilder');
 const SALT_WORK_FACTOR = 10;
 const bcrypt = Promise.promisifyAll(require('bcrypt'));

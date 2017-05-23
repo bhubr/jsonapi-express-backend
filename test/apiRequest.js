@@ -74,7 +74,8 @@ module.exports = function(app) {
       attributes: {
         email: chance.email(),
         password: 'foobar'
-      }
+      },
+      relationships: {}
     };
   }
 
