@@ -71,4 +71,5 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - attention! I override req.body.data.type somewhere...
 - check that the payload attributes have proper format (check against model relationships descriptor, then inside check for data, and inside for type and id, then inside for existing entry)
 - Permissions on *create*: check that provided user id in relationships payload matches the JWT's user id.
+- Check presence of "data" key on each relationship key
 - More issues on [project issue tracker](https://github.com/bhubr/jsonapi-express-backend/issues)
