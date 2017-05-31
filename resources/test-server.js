@@ -6,8 +6,10 @@ const env = process.env.NODE_ENV ? process.env.NODE_ENV : 'test';
 const config = configs[env];
 const models = require('./models');
 const { router, middlewares, queryBuilder, queryAsync } = require('../index')(__dirname, config, models);
-
+const winston = require('winston');
 const port = config.port || 3333;
+
+winston.level = 'silly';
 
 process.on('uncaughtException', function (err) {
   console.error(err.stack);

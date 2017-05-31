@@ -1,48 +1,48 @@
 module.exports = {
-	users: {
+	user: {
     requiredAttributes: ['email', 'password'],
     relationships: {
       posts: {
-        table: 'posts',
+        model: 'post',
         type: 'hasMany',
         reverse: 'author'
       },
       profile: {
-        table: 'extended-profiles',
+        model: 'extendedProfile',
         type: 'belongsTo',
         reverse: 'user'
       },
       suduModels: {
-        table: 'super-duper-models',
+        model: 'superDuperModel',
         type: 'hasMany',
         reverse: 'owner'
       }
     }
   },
-  'extended-profiles': {
+  extendedProfile: {
     relationships: {
       user: {
-        table: 'users',
+        model: 'user',
         type: 'belongsTo',
         reverse: 'profile'
       }
     }
   },
-  posts: {
+  post: {
     requiredAttributes: ['title'],
     relationships: {
       author: {
-        table: 'users',
+        model: 'user',
         type: 'belongsTo',
         reverse: 'posts'
       }
     }
   },
-  'super-duper-models': {
+  superDuperModel: {
     requiredAttributes: ['name'],
     relationships: {
       owner: {
-        table: 'users',
+        model: 'user',
         type: 'belongsTo',
         reverse: 'suduModels'
       }

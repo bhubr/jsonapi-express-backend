@@ -84,9 +84,11 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 
 - Model / table names
   - model: super-duper-model (Ember)
-  - plural: super-duper-models (Ember)
+  - plural: super-duper-models ** (Ember, Backend)
   - singular: superDuperModel (Backend)
-  - plural: superDuperModels (Backend)
-  - table: super_duper_models
+  - plural: superDuperModels (??)
+  - table: super_duper_models (Backend)
 - Beware of inflection
   - niceCity => niceCities
+
+- Exit on connection failure
