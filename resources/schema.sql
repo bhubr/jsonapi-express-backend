@@ -116,3 +116,13 @@ ADD UNIQUE(name);
 INSERT INTO roles(name) VALUES('Admin'),('User');
 INSERT INTO permissions(name) VALUES('users:read:all'),('users:update:all'),('users:delete:all'),('users:read:self'),('users:update:self');
 INSERT INTO role_permission(roleId, permissionId) VALUES(1,1),(1,2),(1,3),(2,4),(2,5);
+
+
+-- Test tables
+CREATE TABLE `super_duper_models` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `ownerId` int(11) UNSIGNED NOT NULL,
+  `dummyField` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL
+);

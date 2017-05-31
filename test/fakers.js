@@ -43,6 +43,35 @@ const fakers = {
     return posts;
   },
 
+  extendedProfile: function(userId) {
+    return {
+      userId,
+      twitterUrl: 'https://twitter.com/' + chance.twitter(),
+      facebookUrl: 'https://www.facebook.com/profile.php?id=' + chance.fbid(),
+      linkedinUrl: chance.url(),
+      address: chance.address(),
+      phone: chance.phone()
+    }
+  },
+
+  superDuperModel: function(ownerId) {
+    return {
+      dummyField: chance.sentence({ words: 3 }),
+      ownerId
+    }
+  },
+
+  superDuperModels: function(ownerId, n) {
+    if(n === undefined || isNaN(n)) {
+      return this.superDuperModel(ownerId);
+    }
+    let superDuperModels = [];
+    for(let i = 0; i < n ; i++) {
+      superDuperModels.push(this.superDuperModel(ownerId));
+    }
+    return superDuperModels;
+  },
+
 
   /**
    * Generate fake user payload
