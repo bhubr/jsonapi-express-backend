@@ -3,8 +3,8 @@
 module.exports = function(baseDir, config, modelDescriptors) {
   const { query } = require('jsonapi-express-backend-query')(config.db);
 
-  const storeSqlStrategy = require('./lib/model/storeSqlStrategy')(modelDescriptors, query);
   const model = require('./lib/model/index')(modelDescriptors);
+  const storeSqlStrategy = require('./lib/model/storeSqlStrategy')(modelDescriptors, model.relationships, query);
   model.store.setStrategy(storeSqlStrategy);
 
   const middleware = require('./lib/middleware/index')(modelDescriptors);

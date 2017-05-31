@@ -19,12 +19,26 @@ const fakers = require('./fakers');
 describe('Test store SQL strategy', () => {
 
   it('Create user', (done) => {
-    jsonapi.model.store.createRecord('user', fakers.user())
-    .then(utils.passLog('created user'))
-    .then(() => done());
+    chain(jsonapi.model.store.createRecord('user', fakers.user()))
+    .set('user')
+    // .then(utils.passLog('created user'))
+    .then(user => {
+      const posts = fakers.posts(user.id, 5);
+      return Promise.map(posts, post =>
+        jsonapi.model.store.createRecord('post', post)
+      )
+    })
+    .then(utils.passLog('posts'))
+    .get(({ user }) => jsonapi.model.store.findRelatees('user', user.id, 'posts'))
+    .then(utils.passLog('relatees'))
+    .then(() => done())
+    .catch(err => {
+      console.log('## err', err);
+      throw err;
+    });
   });
 
-  it('Create users and posts', () => {
+  it.skip('Create users and posts', () => {
     const users = fakers.users(10);
     const postsPerUser = [2, 3, 1, 0, 4, 3, 2, 3, 1, 2];
     const mapRecords = utils.getMapRecords('users');
