@@ -83,7 +83,8 @@ describe('Test store SQL strategy', () => {
     ))
     .then(queries => Promise.map(queries, query => queryAsync(query)))
     .then(utils.passLog('pivot entries'))
-    .get(({ post }) => store.findAllRelatees('post', post.id))
+    .get(({ post }) => store.findAllRelatees('post', post))
+    .then(utils.passLog('all post relatees'))
 
     // .then(() => done())
     .catch(err => {
