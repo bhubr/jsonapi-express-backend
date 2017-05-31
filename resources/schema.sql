@@ -46,18 +46,20 @@ ALTER TABLE `role_permission`
 
 
 -- Test tables
-CREATE TABLE `extended_profiles` (
+CREATE TABLE `extendedprofiles` (
   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `userId` int(11) UNSIGNED NOT NULL,
   `phone` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `address` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `twitterUrl` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `facebookUrl` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `linkedinUrl` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL
+  `linkedinUrl` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL
 );
 
-ALTER TABLE `extended_profiles`
-  ADD CONSTRAINT `extended_profiles_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `extendedprofiles`
+  ADD CONSTRAINT `extendedprofiles_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ALTER TABLE `users`
 --   ADD CONSTRAINT `users_ibfk_2` FOREIGN KEY (`profileId`) REFERENCES `extended_profiles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;

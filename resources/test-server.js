@@ -20,8 +20,13 @@ process.on('uncaughtException', function (err) {
 const app = express();
 // app.use(morgan('tiny'));
 app.use(express.static('public'));
-app.use(bodyParser.json({ type: 'application/json' }));
-app.use('/api/v1', middlewares.checkJwt);
+if(process.env.NODE_ENV === 'test') {
+  app.use(bodyParser.json({ type: 'application/json' }));
+  app.use('/api/v1', middlewares.checkJwt);
+}
+else {
+  app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+}
 app.use('/api/v1', middlewares.jsonApi);
 app.use('/api/v1', router);
 

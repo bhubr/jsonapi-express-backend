@@ -95,6 +95,26 @@ module.exports = function(app) {
     };
   }
 
+  function getProfilePayload(userId) {
+    return {
+      type: 'extended-profiles',
+      attributes: {
+        'twitter-url': 'https://twitter.com/' + chance.twitter(),
+        'facebook-url': 'https://www.facebook.com/profile.php?id=' + chance.fbid(),
+        'linkedin-url': chance.url(),
+        address: chance.address(),
+        phone: chance.phone()
+      },
+      relationships: {
+        user: {
+          data: {
+            type: 'users', id: userId
+          }
+        }
+      }
+    };
+  }
+
   /**
    * Signup then login a fake user
    */
@@ -113,5 +133,5 @@ module.exports = function(app) {
     .then(res => (res.body.data));
   }
 
-  return { post, put, get, 'delete': _delete, getUserPayload, getPostPayload, signupAndLogin, login };
+  return { post, put, get, 'delete': _delete, getUserPayload, getPostPayload, getProfilePayload, signupAndLogin, login };
 };

@@ -22,7 +22,7 @@ describe('JSON API requests', () => {
     api = require('./apiRequest')(app);
   });
 	
-  it('creates a user', () => {
+  it.skip('creates a user', () => {
     const payload = api.getUserPayload();
     const { email } = payload.attributes;
     return api.post('/api/v1/users', payload)
@@ -39,7 +39,7 @@ describe('JSON API requests', () => {
   });
 
   
-  it('creates a user then signs in', () => {
+  it.skip('creates a user then signs in', () => {
     const payload = api.getUserPayload();
     const { email } = payload.attributes;
     return chain(api.post('/api/v1/users', payload))
@@ -59,7 +59,7 @@ describe('JSON API requests', () => {
     });
   });
 
-  it('creates a user, and attempts to modify it', () => {
+  it.skip('creates a user, and attempts to modify it', () => {
     return api.signupAndLogin()
     .then(data => api.put(
       '/api/v1/users/' + data.userId,
@@ -68,7 +68,7 @@ describe('JSON API requests', () => {
     ).expect(200));
   });
 
-  it('creates two users, first attempts to modify second but *fails*', () => {
+  it.skip('creates two users, first attempts to modify second but *fails*', () => {
     return Promise.all([
       api.signupAndLogin(),
       api.signupAndLogin()
@@ -80,7 +80,7 @@ describe('JSON API requests', () => {
     ).expect(403));
   });
 
-  it('creates a user, then a post', () => {
+  it.skip('creates a user, then a post', () => {
     return chain(api.signupAndLogin())
     .set('credentials')
     .then(({ jwt, userId }) => api.getPostPayload(userId))
@@ -95,5 +95,39 @@ describe('JSON API requests', () => {
     // ))
     // .then(res => { console.log(res.body) });
   });
+
+  it.skip('creates a user, then a post', () => {
+    return chain(api.signupAndLogin())
+    .set('credentials')
+    .then(({ jwt, userId }) => api.getPostPayload(userId))
+    .set('payload')
+    .get(({ credentials, payload}) =>
+      api.post('/api/v1/posts', payload, credentials.jwt)
+      .expect(200)
+    )
+    // .then(([admin, user]) => api['delete'](
+    //   '/api/v1/users/' + user.userId,
+    //   admin.jwt
+    // ))
+    // .then(res => { console.log(res.body) });
+  });
+
+  it('creates a user, then an extended profile', () => {
+    return chain(api.signupAndLogin())
+    .set('credentials')
+    .then(({ jwt, userId }) => api.getProfilePayload(userId))
+    .set('payload')
+    .get(({ credentials, payload}) =>
+      api.post('/api/v1/extended_profiles', payload, credentials.jwt)
+      .then(res => { console.log(res.body) })
+      // .expect(200)
+    )
+    // .then(([admin, user]) => api['delete'](
+    //   '/api/v1/users/' + user.userId,
+    //   admin.jwt
+    // ))
+    // .then(res => { console.log(res.body) });
+  });
+
 
 });
