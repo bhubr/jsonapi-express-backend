@@ -1,7 +1,6 @@
 const request = require('supertest');
-const Chance = require('chance');
-const chance = new Chance();
 const Promise = require('bluebird');
+const fakers = require('./fakers');
 
 module.exports = function(app) {
 
@@ -65,61 +64,12 @@ module.exports = function(app) {
     return noSend('delete', url, jwt);
   }
 
-  /**
-   * Generate fake user payload
-   */
-  function getUserPayload() {
-    return {
-      type: 'users',
-      attributes: {
-        email: chance.email(),
-        password: 'foobar'
-      },
-      relationships: {}
-    };
-  }
-
- function getPostPayload(userId) {
-    return {
-      type: 'posts',
-      attributes: {
-        title: chance.sentence({ words: 3 }),
-        slug: chance.guid(),
-        content: chance.paragraph({ sentences: 2 })
-      },
-      relationships: {
-        author: { data: {
-          type: 'users', id: userId
-        } }
-      }
-    };
-  }
-
-  function getProfilePayload(userId) {
-    return {
-      type: 'extended-profiles',
-      attributes: {
-        'twitter-url': 'https://twitter.com/' + chance.twitter(),
-        'facebook-url': 'https://www.facebook.com/profile.php?id=' + chance.fbid(),
-        'linkedin-url': chance.url(),
-        address: chance.address(),
-        phone: chance.phone()
-      },
-      relationships: {
-        user: {
-          data: {
-            type: 'users', id: userId
-          }
-        }
-      }
-    };
-  }
 
   /**
    * Signup then login a fake user
    */
   function signupAndLogin() {
-    const user = getUserPayload();
+    const user = fakers.getUserPayload();
     return post('/api/v1/users', user)
     .then(() => post('/api/v1/signin', user).expect(200))
     .then(res => (res.body.data));
@@ -133,5 +83,5 @@ module.exports = function(app) {
     .then(res => (res.body.data));
   }
 
-  return { post, put, get, 'delete': _delete, getUserPayload, getPostPayload, getProfilePayload, signupAndLogin, login };
+  return { post, put, get, 'delete': _delete, signupAndLogin, login };
 };
