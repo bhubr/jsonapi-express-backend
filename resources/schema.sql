@@ -46,7 +46,7 @@ ALTER TABLE `role_permission`
 
 
 -- Test tables
-CREATE TABLE `extendedprofiles` (
+CREATE TABLE `extended_profiles` (
   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `userId` int(11) UNSIGNED NOT NULL,
   `phone` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -126,3 +126,32 @@ CREATE TABLE `super_duper_models` (
   `createdAt` datetime DEFAULT NULL,
   `updatedAt` datetime DEFAULT NULL
 );
+
+ALTER TABLE `posts` ADD COLUMN `metaId` int(11);
+
+CREATE TABLE `post_metas` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `postId` int(11) UNSIGNED NOT NULL,
+  `metaValue` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL
+);
+
+
+ALTER TABLE `post_metas`
+  ADD CONSTRAINT `post_metas_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE TABLE `post_comments` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `postId` int(11) UNSIGNED NOT NULL,
+  `authorId` int(11) UNSIGNED DEFAULT NULL,
+  `authorEmail` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `commentText` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL
+);
+
+ALTER TABLE `post_comments`
+  ADD CONSTRAINT `post_comments_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+

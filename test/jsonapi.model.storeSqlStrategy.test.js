@@ -13,13 +13,14 @@ const config = configs[env];
 const models = require('../resources/models');
 // const { router, middlewares, queryBuilder, queryAsync } = 
 const jsonapi = require('../index')(path.normalize(__dirname + '/../resources'), config, models);
-const { store } = jsonapi.model;
+const { store, descriptors } = jsonapi.model;
+const { queryBuilder, queryAsync } = jsonapi;
 
-const fakers = require('./fakers');
+const fakers = require('./fakers'); //(descriptors);
 
 describe('Test store SQL strategy', () => {
 
-  it('Create user', (done) => {
+  it.skip('Create user, posts, profile, dummy models', (done) => {
     chain(store.createRecord('user', fakers.user()))
     .set('user')
     // .then(utils.passLog('created user'))
@@ -47,6 +48,49 @@ describe('Test store SQL strategy', () => {
       throw err;
     });
   });
+
+  it('Creates user, posts, post meta, comments, tags', () => 
+    chain(store.createRecord('user', fakers.user()))
+    .set('user')
+    .then(user =>
+      store.createRecord('post', fakers.post(user.id))
+    )
+    .set('post')
+    // .get(utils.passLog('\n### User and Post'))
+    .then(post => {
+      const postComments = fakers.postComments(post.id, 3);
+      const postMeta = fakers.postMeta(post.id);
+      const tags = fakers.tags(4);
+      console.log(postComments, postMeta, tags);
+      return Promise.all([
+        store.createRecord('postMeta', postMeta),
+        Promise.map(postComments, postComment =>
+          store.createRecord('postComment', postComment)
+        ),
+        Promise.map(tags, tag =>
+          store.createRecord('tag', tag)
+        )
+      ]);
+    })
+    .set('relatees')
+    .then(utils.passLog('relatees'))
+    .then(([postMeta, comments, tags]) => {
+      return tags.map(tag => (tag.id));
+    })
+    .set('tagIds')
+    .get(({ post, tagIds }) => (
+      tagIds.map(tagId => queryBuilder.insert('posts_tags_tags', { postId: post.id, tagId }))
+    ))
+    .then(queries => Promise.map(queries, query => queryAsync(query)))
+    .then(utils.passLog('pivot entries'))
+    .get(({ post }) => store.findAllRelatees('post', post.id))
+
+    // .then(() => done())
+    .catch(err => {
+      console.log('## err', err);
+      throw err;
+    })
+  );
 
   it.skip('Create users and posts', () => {
     const users = fakers.users(10);

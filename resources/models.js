@@ -35,6 +35,48 @@ module.exports = {
         model: 'user',
         type: 'belongsTo',
         reverse: 'posts'
+      },
+      meta: {
+        model: 'postMeta',
+        type: 'belongsTo',
+        reverse: 'post'
+      },
+      comments: {
+        model: 'postComment',
+        type: 'hasMany',
+        reverse: 'post'
+      },
+      tags: {
+        model: 'tag',
+        type: 'hasMany',
+        reverse: 'posts'
+      }
+    }
+  },
+  tag: {
+    relationships: {
+      posts: {
+        model: 'post',
+        type: 'hasMany',
+        reverse: 'tags'
+      }
+    }
+  },
+  postComment: {
+    relationships: {
+      post: {
+        model: 'post',
+        type: 'belongsTo',
+        reverse: 'comments'
+      }
+    }
+  },
+  postMeta: {
+    relationships: {
+      post: {
+        model: 'post',
+        type: 'belongsTo',
+        reverse: 'meta'
       }
     }
   },
