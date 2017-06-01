@@ -115,8 +115,8 @@ describe('Test store SQL strategy', () => {
     .then(entries => (entries.map(entry => (entry.post))))
     // .then(utils.passLog('posts only'))
     .then(posts => store.findAllRelateesMulti('post', posts))
-    // .then(utils.passLog('posts relatees'))
-    .then(relatees => { console.log(_.map(relatees, 'meta')); })
+    .then(utils.passLog('posts with relatees'))
+    .then(records => { console.log(_.map(records, '_rel')); })
     .catch(err => {
       console.log('## err', err);
       throw err;
