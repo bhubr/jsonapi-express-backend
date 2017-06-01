@@ -63,18 +63,22 @@ describe('JSON API requests', () => {
 
   it('creates a user, and attempts to modify it', () => {
     let userId;
+    let email;
     return api.signupAndLogin()
     .then(data => {
       userId = data.userId;
+      email = 'modified.email' + ts() + '@example.com';
       return api.put(
         '/api/v1/users/' + data.userId,
-        { id: data.userId, type: 'users', attributes: { email: 'modified.email' + ts() + '@example.com' } },
+        { id: data.userId, type: 'users', attributes: { email } },
         data.jwt
       ).expect(200);
     })
-    .then(() => api.get('/api/v1/users/' + userId))
-    .expect(200)
-    .then(console.log);
+    .then(() => api.get('/api/v1/users/' + userId).expect(200))
+    .then(res => {
+      const { attributes } = res.body.data;
+      expect(attributes.email).to.equal(email);
+    });
   });
 
   it('creates two users, first attempts to modify second but *fails*', () => {
