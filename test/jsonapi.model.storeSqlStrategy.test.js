@@ -79,7 +79,7 @@ describe('Test store SQL strategy', () => {
     })
     .set('tagIds')
     .get(({ post, tagIds }) => (
-      tagIds.map(tagId => queryBuilder.insert('posts_tags_tags', { postId: post.id, tagId }))
+      tagIds.map(tagId => queryBuilder.insert('post_tag_tags', { postId: post.id, tagId }))
     ))
     .then(queries => Promise.map(queries, query => queryAsync(query)))
     .then(utils.passLog('pivot entries'))

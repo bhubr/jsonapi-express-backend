@@ -87,18 +87,18 @@ CREATE TABLE `tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
-CREATE TABLE `posts_tags_tags` (
+CREATE TABLE `post_tag_tags` (
   `postId` int(11) UNSIGNED NOT NULL,
   `tagId` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-ALTER TABLE `posts_tags_tags`
+ALTER TABLE `post_tag_tags`
   ADD PRIMARY KEY (`postId`,`tagId`);
 
-ALTER TABLE `posts_tags_tags`
-  ADD CONSTRAINT `posts_tags_tags_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `posts_tags_tags`
-  ADD CONSTRAINT `posts_tags_tags_ibfk_2` FOREIGN KEY (`tagId`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `post_tag_tags`
+  ADD CONSTRAINT `post_tag_tags_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `post_tag_tags`
+  ADD CONSTRAINT `post_tag_tags_ibfk_2` FOREIGN KEY (`tagId`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 
 -- Unicity constraints
