@@ -125,6 +125,29 @@ describe('JSON API requests', () => {
     // .then(res => { console.log(res.body) });
   });
 
+  it('creates a user, then a post, then post meta, comments, tags', () => {
+    let postId;
+    return chain(api.signupAndLogin())
+    .set('credentials')
+    .then(({ jwt, userId }) => fakers.getPostPayload(userId))
+    .set('payload')
+    .get(({ credentials, payload}) =>
+      api.post('/api/v1/posts', payload, credentials.jwt)
+      .expect(200)
+    )
+    .then(res => {
+      console.log(res.body)
+      const { attributes, id, type } = res.body.data;
+      expect(type).to.equal('posts');
+      // expect(attributes.email).to.equal(email);
+    });
+    // .then(([admin, user]) => api['delete'](
+    //   '/api/v1/users/' + user.userId,
+    //   admin.jwt
+    // ))
+    // .then(res => { console.log(res.body) });
+  });
+
   it('creates a user, then an extended profile', () => {
     return chain(api.signupAndLogin())
     .set('credentials')
