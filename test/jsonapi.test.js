@@ -4,10 +4,11 @@ const should = chai.should();
 const expect = chai.expect;
 const chain = require('store-chain');
 const Promise = require('bluebird');
-// const request = require('supertest');
+
 let api;
+const fakers = require('./fakers');
 const db = require('./dbTools');
-// let app;
+
 function ts() {
   return ((new Date()).getTime()).toString(36)
     + (Math.ceil(100000 * Math.random())).toString(36); 
@@ -22,10 +23,11 @@ describe('JSON API requests', () => {
     api = require('./apiRequest')(app);
   });
 	
-  it.skip('creates a user', () => {
-    const payload = api.getUserPayload();
+  it('creates a user', () => {
+    const payload = fakers.getUserPayload();
     const { email } = payload.attributes;
     return api.post('/api/v1/users', payload)
+    // .then(res => { console.log(res.body) })
     .expect(200)
     .then(res => {
       const { data } = res.body;
@@ -39,8 +41,8 @@ describe('JSON API requests', () => {
   });
 
   
-  it.skip('creates a user then signs in', () => {
-    const payload = api.getUserPayload();
+  it('creates a user then signs in', () => {
+    const payload = fakers.getUserPayload();
     const { email } = payload.attributes;
     return chain(api.post('/api/v1/users', payload))
     .then(res => (res.body.data.id))
@@ -59,7 +61,7 @@ describe('JSON API requests', () => {
     });
   });
 
-  it.skip('creates a user, and attempts to modify it', () => {
+  it('creates a user, and attempts to modify it', () => {
     return api.signupAndLogin()
     .then(data => api.put(
       '/api/v1/users/' + data.userId,
@@ -96,7 +98,7 @@ describe('JSON API requests', () => {
     // .then(res => { console.log(res.body) });
   });
 
-  it.skip('creates a user, then a post', () => {
+  it('creates a user, then a post', () => {
     return chain(api.signupAndLogin())
     .set('credentials')
     .then(({ jwt, userId }) => api.getPostPayload(userId))

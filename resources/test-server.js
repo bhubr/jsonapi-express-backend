@@ -23,6 +23,7 @@ const app = express();
 // app.use(morgan('tiny'));
 app.use(express.static('public'));
 if(process.env.NODE_ENV === 'test') {
+  console.log('use application/json');
   app.use(bodyParser.json({ type: 'application/json' }));
   app.use('/api/v1', middlewares.checkJwt);
 }
