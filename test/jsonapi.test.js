@@ -126,21 +126,25 @@ describe('JSON API requests', () => {
   });
 
   it('creates a user, then a post, then post meta, comments, tags', () => {
-    let postId;
+    let userId;
     return chain(api.signupAndLogin())
     .set('credentials')
     .then(({ jwt, userId }) => fakers.getPostPayload(userId))
     .set('payload')
+    .get(({ credentials }) => { userId = credentials.userId; })
     .get(({ credentials, payload}) =>
       api.post('/api/v1/posts', payload, credentials.jwt)
       .expect(200)
     )
     .then(res => {
-      console.log(res.body)
-      const { attributes, id, type } = res.body.data;
+      // console.log(res.body)
+      const { relationships, attributes, id, type } = res.body.data;
       expect(type).to.equal('posts');
+      expect(relationships.author.data.id).to.equal(userId);
+      return id;
       // expect(attributes.email).to.equal(email);
-    });
+    })
+    .set('postId')
     // .then(([admin, user]) => api['delete'](
     //   '/api/v1/users/' + user.userId,
     //   admin.jwt
