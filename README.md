@@ -92,3 +92,5 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
   - niceCity => niceCities
 
 - Exit on connection failure
+
+- Symetric one to one: if set userId on extendedProfile, set extendedProfile's id for user's profileId

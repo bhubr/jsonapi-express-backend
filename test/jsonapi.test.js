@@ -70,7 +70,7 @@ describe('JSON API requests', () => {
     ).expect(200));
   });
 
-  it.skip('creates two users, first attempts to modify second but *fails*', () => {
+  it('creates two users, first attempts to modify second but *fails*', () => {
     return Promise.all([
       api.signupAndLogin(),
       api.signupAndLogin()
@@ -82,10 +82,10 @@ describe('JSON API requests', () => {
     ).expect(403));
   });
 
-  it.skip('creates a user, then a post', () => {
+  it('creates a user, then a post', () => {
     return chain(api.signupAndLogin())
     .set('credentials')
-    .then(({ jwt, userId }) => api.getPostPayload(userId))
+    .then(({ jwt, userId }) => fakers.getPostPayload(userId))
     .set('payload')
     .get(({ credentials, payload}) =>
       api.post('/api/v1/posts', payload, credentials.jwt)
@@ -101,7 +101,7 @@ describe('JSON API requests', () => {
   it('creates a user, then a post', () => {
     return chain(api.signupAndLogin())
     .set('credentials')
-    .then(({ jwt, userId }) => api.getPostPayload(userId))
+    .then(({ jwt, userId }) => fakers.getPostPayload(userId))
     .set('payload')
     .get(({ credentials, payload}) =>
       api.post('/api/v1/posts', payload, credentials.jwt)
@@ -117,12 +117,12 @@ describe('JSON API requests', () => {
   it('creates a user, then an extended profile', () => {
     return chain(api.signupAndLogin())
     .set('credentials')
-    .then(({ jwt, userId }) => api.getProfilePayload(userId))
+    .then(({ jwt, userId }) => fakers.getProfilePayload(userId))
     .set('payload')
     .get(({ credentials, payload}) =>
       api.post('/api/v1/extended_profiles', payload, credentials.jwt)
-      .then(res => { console.log(res.body) })
-      // .expect(200)
+      // .then(res => { console.log(res.body) })
+      .expect(200)
     )
     // .then(([admin, user]) => api['delete'](
     //   '/api/v1/users/' + user.userId,
