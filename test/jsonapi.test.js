@@ -131,8 +131,7 @@ describe('JSON API requests', () => {
     .then(({ jwt, userId }) => fakers.getProfilePayload(userId))
     .set('payload')
     .get(({ credentials, payload}) =>
-      api.post('/api/v1/extended_profiles', payload, credentials.jwt)
-      // .then(res => { console.log(res.body) })
+      api.post('/api/v1/extended-profiles', payload, credentials.jwt)
       .expect(200)
     )
     // .then(([admin, user]) => api['delete'](
