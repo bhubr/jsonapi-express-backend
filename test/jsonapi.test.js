@@ -4,9 +4,11 @@ const should = chai.should();
 const expect = chai.expect;
 const chain = require('store-chain');
 const Promise = require('bluebird');
+const _ = require('lodash');
 
 let api;
 const fakers = require('./fakers');
+const utils = require('../lib/utils');
 const db = require('./dbTools');
 
 function ts() {
@@ -127,11 +129,28 @@ describe('JSON API requests', () => {
 
   it('creates a user, then a post, then post meta, comments, tags', () => {
     let userId;
+    let jwt;
+    const comments = [
+      { commentText: 'Lorem ipsum blah blah', authorEmail: 'dummy@example.com' },
+      { commentText: 'Another dummy comment', authorEmail: 'foobar@example.com' },
+      { commentText: 'Yet another dumb comment', authorEmail: 'johndoe@example.com' }
+    ];
+    const tags = [
+      { name: 'jsonapi', color: '#fff' },
+      { name: 'nodejs', color: '#abc' },
+      { name: 'javascript', color: '#dd7' }
+    ];
+    const postMeta = {
+      'meta-value': JSON.stringify({ some: 'data', foo: 'bar'})
+    };
     return chain(api.signupAndLogin())
     .set('credentials')
     .then(({ jwt, userId }) => fakers.getPostPayload(userId))
     .set('payload')
-    .get(({ credentials }) => { userId = credentials.userId; })
+    .get(({ credentials }) => {
+      userId = credentials.userId;
+      jwt = credentials.jwt;
+    })
     .get(({ credentials, payload}) =>
       api.post('/api/v1/posts', payload, credentials.jwt)
       .expect(200)
@@ -145,6 +164,65 @@ describe('JSON API requests', () => {
       // expect(attributes.email).to.equal(email);
     })
     .set('postId')
+    .then(postId => _.map(comments, attrs => fakers.mapToPayload(
+      'post-comments', attrs, [{ key: 'post', type: 'posts', id: postId }]
+    )))
+    .then(payloads => Promise.map(payloads,
+      payload => api.post('/api/v1/post-comments', payload, jwt)
+      .expect(200)
+    ))
+    .then(results => _.map(results, 'body.data'))
+    .then(datas => {
+      datas.forEach((data, index) => {
+        const relData = data.relationships.post.data;
+        expect(Number.isInteger(data.id)).to.be.true;
+        expect(data.type).to.equal('post-comments');
+        expect(data.attributes['comment-text']).to.equal(comments[index].commentText);
+        expect(data.attributes['author-email']).to.equal(comments[index].authorEmail);
+        expect(Number.isInteger(relData.id)).to.be.true;
+        expect(relData.type).to.equal('posts');
+      })
+      return _.map(datas, 'id');
+    })
+    .set('commentIds')
+    // .then(console.log)
+    .get(({ postId }) => _.map(tags, attrs => fakers.mapToPayload(
+      'tags', attrs, [{ key: 'posts', type: 'posts', id: [postId] }]
+    )))
+    .then(payloads => {
+      console.log(_.map(payloads, 'relationships.posts.data'));
+      return payloads;
+    })
+    .then(payloads => Promise.map(payloads,
+      payload => api.post('/api/v1/tags', payload, jwt)
+      .expect(200)
+    ))
+    .then(results => _.map(results, 'body.data'))
+    .then(datas => {
+      datas.forEach((data, index) => {
+        expect(Number.isInteger(data.id)).to.be.true;
+        expect(data.type).to.equal('tags');
+        expect(data.attributes.name).to.equal(tags[index].name);
+        expect(data.attributes.color).to.equal(tags[index].color);
+      })
+      return _.map(datas, 'id');
+    })
+    .get(({ postId }) => fakers.mapToPayload(
+      'post-metas', postMeta, [{ key: 'post', type: 'posts', id: postId }])
+    )
+    .then(payload => api.post('/api/v1/post-metas', payload, jwt).expect(200))
+    .then(res => (res.body.data))
+    .then(data => {
+      expect(Number.isInteger(data.id)).to.be.true;
+      expect(data.type).to.equal('post-metas');
+      expect(data.attributes['meta-value']).to.equal(postMeta['meta-value']);
+    })
+    .get(({ postId }) => api.get('/api/v1/posts/' + postId, jwt).expect(200))
+    .then(res => (res.body.data))
+    .then(data => {
+      console.log(data.relationships);
+    })
+    // .then(console.log)
     // .then(([admin, user]) => api['delete'](
     //   '/api/v1/users/' + user.userId,
     //   admin.jwt

@@ -131,6 +131,23 @@ const fakers = {
     },
 
 
+    mapToPayload: function(kebabPlural, attributes, relationships) {
+      return {
+        type: kebabPlural,
+        attributes,
+        relationships: relationships.reduce((carry, rel) => {
+          const { key, type, id } = rel;
+          const data = id.constructor === Array ?
+            id.map(_id => ({ type, id: _id })) :
+            { type, id };
+          console.log(rel, id.constructor, data);
+          carry[rel.key] = { data };
+          return carry;
+        }, {})
+      };
+    },
+
+
     /**
      * Generate fake user payload
      */
