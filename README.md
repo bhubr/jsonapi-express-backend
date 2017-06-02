@@ -72,10 +72,26 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - check that the payload attributes have proper format (check against model relationships descriptor, then inside check for data, and inside for type and id, then inside for existing entry)
 - Permissions on *create*: check that provided user id in relationships payload matches the JWT's user id.
 - Check presence of "data" key on each relationship key
-- Check that *required* (i.e. belongsTo) relationships are present
+- Check that *required* (i.e. belongsTo) relationships are present (... though rel. type is most likely not the only criteria: how about 1-to-1 which may not be associated on each object's creation)
 - Sort out naming conventions:
   - table names
   - field names
   - singular type name
   - plural type name
 - More issues on [project issue tracker](https://github.com/bhubr/jsonapi-express-backend/issues)
+
+## Todo FIRST
+
+- Model / table names
+  - model: super-duper-model (Ember)
+  - plural: super-duper-models ** (Ember, Backend)
+  - singular: superDuperModel (Backend)
+  - plural: superDuperModels (??)
+  - table: super_duper_models (Backend)
+- Beware of inflection
+  - niceCity => niceCities
+
+- Exit on connection failure
+
+- Symetric one to one: if set userId on extendedProfile, set extendedProfile's id for user's profileId
+- Check that provided kebabPlural is indeed in kebab case (begins with lc letter, then only lc/numbers/dash)

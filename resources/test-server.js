@@ -5,9 +5,11 @@ const configs = require(__dirname + '/config.json');
 const env = process.env.NODE_ENV ? process.env.NODE_ENV : 'test';
 const config = configs[env];
 const models = require('./models');
-const { router, middlewares, queryBuilder, queryAsync } = require('../index')(__dirname, config, models);
-
+const { model, router, middlewares, queryBuilder, queryAsync } = require('../index')(__dirname, config, models);
+const winston = require('winston');
 const port = config.port || 3333;
+
+winston.level = 'silly';
 
 process.on('uncaughtException', function (err) {
   console.error(err.stack);
@@ -20,8 +22,14 @@ process.on('uncaughtException', function (err) {
 const app = express();
 // app.use(morgan('tiny'));
 app.use(express.static('public'));
-app.use(bodyParser.json({ type: 'application/json' }));
-app.use('/api/v1', middlewares.checkJwt);
+if(process.env.NODE_ENV === 'test') {
+  // console.log('use application/json');
+  app.use(bodyParser.json({ type: 'application/json' }));
+  app.use('/api/v1', middlewares.checkJwt);
+}
+else {
+  app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+}
 app.use('/api/v1', middlewares.jsonApi);
 app.use('/api/v1', router);
 

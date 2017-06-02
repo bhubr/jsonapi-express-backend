@@ -1,82 +1,61 @@
 const chai = require('chai');
 const should = chai.should();
 const expect = chai.expect();
-const queryParams = require('../queryParams');
+const queryParams = require('../lib/queryParams');
 
 const reqEmptyParams = { params: {} };
-const reqTableOnly = { params: { table: 'users' } };
-const reqTableOnlyDashed = { params: { table: 'car-makes' } };
-const reqTableBadId = { params: { table: 'users', id: 'foo' } };
-const reqTableGoodId = { params: { table: 'car-makes', id: '5' } };
+const reqPluralOnly = { params: { kebabPlural: 'users' } };
+const reqPluralOnlyDashed = { params: { kebabPlural: 'car-makes' } };
+const reqPluralBadId = { params: { kebabPlural: 'users', id: 'foo' } };
+const reqPluralGoodId = { params: { kebabPlural: 'car-makes', id: '5' } };
 
 describe('queryParams', () => {
 	
-	it('tableOnly should throw if no table is passed', () => {
+	it('extract should throw if no table is passed', () => {
     try {
-      queryParams.tableOnly(reqEmptyParams);
+      queryParams.extract(reqEmptyParams);
     } catch(e) {
-      e.message.should.equal('table param is undefined');
+      e.message.should.equal('kebabPlural param is undefined');
     }
 	});
 
-  it('tableOnly should return table', () => {
-    const res = queryParams.tableOnly(reqTableOnly);
-    res.table.should.exist;
-    res.table.should.equal('users');
+  it('extract should return table name, kebab plural, camel singular names', () => {
+    const res = queryParams.extract(reqPluralOnly);
+    res.tableName.should.exist;
+    res.tableName.should.equal('users');
+    res.kebabPlural.should.exist;
+    res.kebabPlural.should.equal('users');
+    res.camelSingular.should.exist;
+    res.camelSingular.should.equal('user');
   });
 
-  it('tableOnly should return lowercased table name', () => {
-    const res = queryParams.tableOnly(reqTableOnlyDashed);
-    res.table.should.exist;
-    res.table.should.equal('carmakes');
-    res.type.should.equal('car-makes');
+  it('extract should return snake-cased table name', () => {
+    const res = queryParams.extract(reqPluralOnlyDashed);
+    res.tableName.should.exist;
+    res.tableName.should.equal('car_makes');
+    res.kebabPlural.should.exist;
+    res.kebabPlural.should.equal('car-makes');
+    res.camelSingular.should.exist;
+    res.camelSingular.should.equal('carMake');
   });
 
-  it('tableAndId should throw if no table is passed', () => {
+  it('extract should throw if bad id is passed', () => {
     try {
-      queryParams.tableAndId(reqEmptyParams);
-    } catch(e) {
-      e.message.should.equal('table param is undefined');
-    }
-  });
-
-  it('tableAndId should throw if no id is passed', () => {
-    try {
-      queryParams.tableAndId(reqTableOnly);
-    } catch(e) {
-      e.message.should.equal('id undefined is NaN');
-    }
-  });
-
-  it('tableAndId should throw if bad id is passed', () => {
-    try {
-      queryParams.tableAndId(reqTableBadId);
+      queryParams.extract(reqPluralBadId);
     } catch(e) {
       e.message.should.equal('id foo is NaN');
     }
   });
 
-  it('tableAndId should return table and id', () => {
-    const res = queryParams.tableAndId(reqTableGoodId);
-    res.table.should.exist;
+  it('extract should return table and id', () => {
+    const res = queryParams.extract(reqPluralGoodId);
+    res.tableName.should.exist;
+    res.tableName.should.equal('car_makes');
+    res.kebabPlural.should.exist;
+    res.kebabPlural.should.equal('car-makes');
+    res.camelSingular.should.exist;
+    res.camelSingular.should.equal('carMake');
     res.id.should.exist;
-    res.table.should.equal('carmakes');
-    res.id.should.equal(5);
-  });
-
-  it('tableAndId should return table and id', () => {
-    const res = queryParams.tableAndId(reqTableGoodId);
-    res.table.should.exist;
-    res.id.should.exist;
-    res.table.should.equal('carmakes');
-    res.id.should.equal(5);
-  });
-
-  it('tableAndId should be callable with direct table and id args', () => {
-    const res = queryParams.tableAndId('users', 5);
-    res.table.should.exist;
-    res.id.should.exist;
-    res.table.should.equal('users');
     res.id.should.equal(5);
   });
 

@@ -53,11 +53,13 @@ CREATE TABLE `extended_profiles` (
   `address` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `twitterUrl` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `facebookUrl` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `linkedinUrl` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL
+  `linkedinUrl` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL
 );
 
-ALTER TABLE `extended_profiles`
-  ADD CONSTRAINT `extended_profiles_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `extendedprofiles`
+  ADD CONSTRAINT `extendedprofiles_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ALTER TABLE `users`
 --   ADD CONSTRAINT `users_ibfk_2` FOREIGN KEY (`profileId`) REFERENCES `extended_profiles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -85,18 +87,18 @@ CREATE TABLE `tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
-CREATE TABLE `posts_tags_tags` (
+CREATE TABLE `post_tag_tags` (
   `postId` int(11) UNSIGNED NOT NULL,
   `tagId` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-ALTER TABLE `posts_tags_tags`
+ALTER TABLE `post_tag_tags`
   ADD PRIMARY KEY (`postId`,`tagId`);
 
-ALTER TABLE `posts_tags_tags`
-  ADD CONSTRAINT `posts_tags_tags_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `posts_tags_tags`
-  ADD CONSTRAINT `posts_tags_tags_ibfk_2` FOREIGN KEY (`tagId`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `post_tag_tags`
+  ADD CONSTRAINT `post_tag_tags_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `post_tag_tags`
+  ADD CONSTRAINT `post_tag_tags_ibfk_2` FOREIGN KEY (`tagId`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 
 -- Unicity constraints
@@ -114,3 +116,42 @@ ADD UNIQUE(name);
 INSERT INTO roles(name) VALUES('Admin'),('User');
 INSERT INTO permissions(name) VALUES('users:read:all'),('users:update:all'),('users:delete:all'),('users:read:self'),('users:update:self');
 INSERT INTO role_permission(roleId, permissionId) VALUES(1,1),(1,2),(1,3),(2,4),(2,5);
+
+
+-- Test tables
+CREATE TABLE `super_duper_models` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `ownerId` int(11) UNSIGNED NOT NULL,
+  `dummyField` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL
+);
+
+ALTER TABLE `posts` ADD COLUMN `metaId` int(11);
+
+CREATE TABLE `post_metas` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `postId` int(11) UNSIGNED NOT NULL,
+  `metaValue` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL
+);
+
+
+ALTER TABLE `post_metas`
+  ADD CONSTRAINT `post_metas_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE TABLE `post_comments` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `postId` int(11) UNSIGNED NOT NULL,
+  `authorId` int(11) UNSIGNED DEFAULT NULL,
+  `authorEmail` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `commentText` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL
+);
+
+ALTER TABLE `post_comments`
+  ADD CONSTRAINT `post_comments_ibfk_1` FOREIGN KEY (`postId`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
