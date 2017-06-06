@@ -34,11 +34,13 @@ function createAdmin() {
   };
   console.log(attrs);
   return hashPasswordAsync(attrs.password)
-  .then(utils.passLog('hashed passwd'))
+  // .then(utils.passLog('hashed passwd'))
   .then(hash => queryBuilder.insert('users', {
     email: attrs.email, password: hash, roleId: 1
   }))
+  // .then(utils.passLog('admin query'))
   .then(queryAsync)
+  // .then(utils.passLog('admin'))
   .then(result => (attrs));
 }
 //   var query = queryBuilder.insert('invitation_codes', { code });

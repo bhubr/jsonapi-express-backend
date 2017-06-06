@@ -140,7 +140,6 @@ const fakers = {
           const data = id.constructor === Array ?
             id.map(_id => ({ type, id: _id })) :
             { type, id };
-          console.log(rel, id.constructor, data);
           carry[rel.key] = { data };
           return carry;
         }, {})

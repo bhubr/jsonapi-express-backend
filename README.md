@@ -95,3 +95,4 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 
 - Symetric one to one: if set userId on extendedProfile, set extendedProfile's id for user's profileId
 - Check that provided kebabPlural is indeed in kebab case (begins with lc letter, then only lc/numbers/dash)
+- todo: can still update a relationship (e.g. comments) by passing wrong type (e.g. tags)

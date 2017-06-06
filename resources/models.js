@@ -81,7 +81,7 @@ module.exports = {
     }
   },
   superDuperModel: {
-    requiredAttributes: ['name'],
+    requiredAttributes: ['dummyField'],
     relationships: {
       owner: {
         model: 'user',
