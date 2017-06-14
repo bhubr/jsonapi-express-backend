@@ -1,7 +1,7 @@
 {
   "name": "jsonapi-express-backend",
   "license": "WTFPL",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/bhubr/jsonapi-express-backend.git"
