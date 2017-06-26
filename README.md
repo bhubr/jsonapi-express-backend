@@ -79,6 +79,9 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
   - singular type name
   - plural type name
 - More issues on [project issue tracker](https://github.com/bhubr/jsonapi-express-backend/issues)
+- move beforeSave hooks from jsonapi to store
+- don't promisify bcrypt funcs since they already return promises!
+- _.uniq to remove dupes from relationship ids
 
 ## Todo FIRST
 
