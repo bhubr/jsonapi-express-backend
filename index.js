@@ -12,5 +12,5 @@ module.exports = function(baseDir, config, modelDescriptors) {
   const { router, middlewares, queryAsync } = require('./lib/jsonapi')(config, generateJwt, checkJwtMiddleware, model, query, middleware);
   const queryBuilder = require('./lib/queryBuilder');
 
-  return { model, router, middlewares, queryBuilder, queryAsync: query };
+  return { model, router, middlewares, queryBuilder, checkJwt, queryAsync: query };
 }
