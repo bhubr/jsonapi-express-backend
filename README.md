@@ -83,6 +83,7 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - don't promisify bcrypt funcs since they already return promises!
 - _.uniq to remove dupes from relationship ids
 - **critical** filter out fields from response payload (e.g. user password...)
+- should not use _.singularize to convert table name to type name (utils.getPerformDeferredManyToMany)
 
 ## Todo FIRST
 
