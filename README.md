@@ -84,7 +84,7 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - _.uniq to remove dupes from relationship ids
 - **critical** filter out fields from response payload (e.g. user password...)
 - should not use _.singularize to convert table name to type name (utils.getPerformDeferredManyToMany)
-
+- 500 if no provided fields on login
 ## Todo FIRST
 
 - Model / table names
