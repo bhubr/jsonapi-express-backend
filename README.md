@@ -49,6 +49,7 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - enforce that *required* relationships are provided on resource creation
   (unless we decide to allow empty relationship: http://stackoverflow.com/questions/15082874/how-to-pass-a-null-value-to-a-foreign-key-field)
 - provide an admin backend single-page app, ala Django Admin
+- Model definition close to Ember Data's with auto-detection of relationships' inverses when possible
 - pagination
 - Don't query *all* the fields for relationships when I need only the id.
 - Implement an "event hub" and fire events on DB record creation/update/deletion.
@@ -59,7 +60,7 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - Prevent from removing email and password from user's required attrs
 - Allow only admins to override roleId on user
 - Pre checks on app start: existing roles and permissions, etc.
-- ~~Move default user role set on beforeSave ? NO, just after!~~
+- ~~Move default user role set on beforeSave ? NO, just after! (prevent overriding)~~
 - Remove role relationship from payload unless user has permission to modify/create user
 - on update, what does JSONAPI spec say? can we update just a subset of the attrs?
 - in future event emitter: on update, fire an event with just the modified fields (so that we can perform custom actions if this or that field is changed)
@@ -72,12 +73,10 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - check that the payload attributes have proper format (check against model relationships descriptor, then inside check for data, and inside for type and id, then inside for existing entry)
 - Permissions on *create*: check that provided user id in relationships payload matches the JWT's user id.
 - Check presence of "data" key on each relationship key
+- validate incoming payloads against a JSON schema
 - Check that *required* (i.e. belongsTo) relationships are present (... though rel. type is most likely not the only criteria: how about 1-to-1 which may not be associated on each object's creation)
-- Sort out naming conventions:
-  - table names
-  - field names
-  - singular type name
-  - plural type name
+- table prefixes
+- compat with e.g. WordPress data model (add custom pk keys, table prefixes, custom table names for relationships...)
 - More issues on [project issue tracker](https://github.com/bhubr/jsonapi-express-backend/issues)
 - move beforeSave hooks from jsonapi to store
 - don't promisify bcrypt funcs since they already return promises!
@@ -85,6 +84,11 @@ An example project is available at [https://github.com/bhubr/jsonapi-express-bac
 - **critical** filter out fields from response payload (e.g. user password...)
 - should not use _.singularize to convert table name to type name (utils.getPerformDeferredManyToMany)
 - 500 if no provided fields on login
+- permissions on relationship setting (one shouldn't be allowed to link objects he doesn't "own")
+- remove relationships on deletion of one of the relatees (check if possible before)
+- relationship keys on many-to-many should be kebab-case, but are still camelCase
+- prevent OR filter queries implying specific user/owner id
+
 ## Todo FIRST
 
 - Model / table names
