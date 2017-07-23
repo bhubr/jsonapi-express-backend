@@ -1,6 +1,7 @@
 const request = require('supertest');
 const Promise = require('bluebird');
 const fakers = require('./fakers');
+const utils = require('../lib/utils');
 
 module.exports = function(app) {
 
@@ -71,7 +72,9 @@ module.exports = function(app) {
   function signupAndLogin() {
     const user = fakers.getUserPayload();
     return post('/api/v1/users', user)
+    // .then(utils.passLog('after signup'))
     .then(() => post('/api/v1/signin', user).expect(200))
+    // .then(utils.passLog('after signin'))
     .then(res => (res.body.data));
   }
 

@@ -13,22 +13,30 @@ winston.level = 'info';
 Promise.promisifyAll(fs);
 
 function jsonapi() {
-  const appRootDir = require('app-root-dir').get();
-  const configDir  = appRootDir + '/' + ('config' || process.env.JSONAPI_EXB_CONFIGDIR);
-  const modelsDir  = appRootDir + '/' + ('models' || process.env.JSONAPI_EXB_MODELSDIR);
-  const mode       = process.env.NODE_ENV || 'development';
-  const config     = require(configDir + '/' + mode);
-  const { query }  = require('jsonapi-express-backend-query')(config.db);
-  const model      = require('./lib/model/index')(modelsDir, config);
-  const middleware = require('./lib/middleware/index')(model.descriptors);
+  const appRootDir  = require('app-root-dir').get();
+  const configDir   = appRootDir + '/' + ('config' || process.env.JSONAPI_EXB_CONFIGDIR);
+  const modelsDir   = appRootDir + '/' + ('models' || process.env.JSONAPI_EXB_MODELSDIR);
+  const mode        = process.env.NODE_ENV || 'development';
+  const config      = require(configDir + '/' + mode);
+  const { query }   = require('jsonapi-express-backend-query')(config.db);
+  const model       = require('./lib/model/index')(modelsDir, config);
+  let {
+    store,
+    descriptors,
+    modelRelationships
+  }                 = model;
+  const middleware  = require('./lib/middleware/index')(descriptors);
+  const storeSqlStrategy = require('./lib/model/storeSqlStrategy')(descriptors, modelRelationships, query);
+  storeSqlStrategy.init();
+  store = Object.assign(store, storeSqlStrategy);
+  console.log(store);
   const { generateJwt, checkJwt, checkJwtMiddleware } = require('./lib/authToken')(appRootDir, config);
   const { router, middlewares, queryAsync } = require('./lib/jsonapi')(config, generateJwt, checkJwtMiddleware, model, query, middleware);
   let jsonapi = {
     config,
     query,
     model,
-    store: model.store,
-    middleware,
+    store,
     queryBuilder: require('./lib/queryBuilder'),
     utils: require('./lib/utils'),
     eventHub: require('./lib/eventHub'),
@@ -36,6 +44,7 @@ function jsonapi() {
     checkJwt,
     checkJwtMiddleware,
     router,
+    middleware,
     middlewares,
     queryAsync
   };
