@@ -7,7 +7,7 @@ const configs    = require(__dirname + '/config.json');
 const env        = process.env.NODE_ENV ? process.env.NODE_ENV : 'test';
 const config     = configs[env];
 const models     = require('./models');
-const { model, router, middlewares, queryBuilder, queryAsync } = require('../index');
+const { model, router, middlewares, queryBuilder, queryAsync, eventHub } = require('../index');
 const winston    = require('winston');
 const port = config.port || 3333;
 
@@ -35,5 +35,9 @@ else {
 app.use('/api/v1', middlewares.jsonApi);
 app.use('/api/v1', router);
 
-app.listen(port);
+eventHub.on('store.ready', () => {
+  // app.listen(port);
+  console.log('yo');  
+})
+
 module.exports = app;

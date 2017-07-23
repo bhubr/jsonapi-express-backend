@@ -4,9 +4,12 @@
 
 // Future versions will be just like:
 // var jsonapi = require('jsonapi-express-backend');
-const extend     = require('xtend');
-const fs         = require('fs');
-const Promise    = require('bluebird');
+const extend  = require('xtend');
+const fs      = require('fs');
+const Promise = require('bluebird');
+const winston = require('winston');
+winston.level = 'info';
+
 Promise.promisifyAll(fs);
 
 function jsonapi() {
@@ -28,6 +31,7 @@ function jsonapi() {
     middleware,
     queryBuilder: require('./lib/queryBuilder'),
     utils: require('./lib/utils'),
+    eventHub: require('./lib/eventHub'),
     generateJwt,
     checkJwt,
     checkJwtMiddleware,
