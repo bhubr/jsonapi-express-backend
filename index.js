@@ -1,6 +1,45 @@
+// Branch 0.5.x
+// Module is required as such:
+// var jsonapi = require('jsonapi-express-backend')(baseDir, config, modelDescriptors)
+
+// Future versions will be just like:
+// var jsonapi = require('jsonapi-express-backend');
+const extend     = require('xtend');
+const fs         = require('fs');
+const Promise    = require('bluebird');
+Promise.promisifyAll(fs);
+
+function jsonapi() {
+  const appRootDir = require('app-root-dir').get();
+  const configDir  = appRootDir + '/' + ('config' || process.env.JSONAPI_EXB_CONFIGDIR);
+  const modelsDir  = appRootDir + '/' + ('models' || process.env.JSONAPI_EXB_MODELSDIR);
+  const mode       = process.env.NODE_ENV || 'development';
+  const config     = require(configDir + '/' + mode);
+  const { query }  = require('jsonapi-express-backend-query')(config.db);
+  const model      = require('./lib/model/index')(modelsDir, config);
+  const middleware = require('./lib/middleware/index')(model.descriptors);
+  const { generateJwt, checkJwt, checkJwtMiddleware } = require('./lib/authToken')(appRootDir, config);
+  const { router, middlewares, queryAsync } = require('./lib/jsonapi')(config, generateJwt, checkJwtMiddleware, model, query, middleware);
+  let jsonapi = {
+    config,
+    query,
+    model,
+    store: model.store,
+    middleware,
+    queryBuilder: require('./lib/queryBuilder'),
+    utils: require('./lib/utils'),
+    generateJwt,
+    checkJwt,
+    checkJwtMiddleware,
+    router,
+    middlewares,
+    queryAsync
+  };
+  return jsonapi;
+}
 
 
-module.exports = function(baseDir, config, modelDescriptors) {
+function legacy(baseDir, config, modelDescriptors) {
   const { query } = require('jsonapi-express-backend-query')(config.db);
 
   const model = require('./lib/model/index')(modelDescriptors);
@@ -15,3 +54,5 @@ module.exports = function(baseDir, config, modelDescriptors) {
 
   return { model, router, middlewares, queryBuilder, utils, checkJwt, queryAsync: query };
 }
+
+module.exports = extend(legacy, jsonapi());

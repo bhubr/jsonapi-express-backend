@@ -1,12 +1,14 @@
-const express = require('express');
+const appRootDir = require('app-root-dir');
+require('app-root-dir').set(__dirname);
+const express    = require('express');
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
-const configs = require(__dirname + '/config.json');
-const env = process.env.NODE_ENV ? process.env.NODE_ENV : 'test';
-const config = configs[env];
-const models = require('./models');
-const { model, router, middlewares, queryBuilder, queryAsync } = require('../index')(__dirname, config, models);
-const winston = require('winston');
+const morgan     = require('morgan');
+const configs    = require(__dirname + '/config.json');
+const env        = process.env.NODE_ENV ? process.env.NODE_ENV : 'test';
+const config     = configs[env];
+const models     = require('./models');
+const { model, router, middlewares, queryBuilder, queryAsync } = require('../index');
+const winston    = require('winston');
 const port = config.port || 3333;
 
 winston.level = 'silly';
