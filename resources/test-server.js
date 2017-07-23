@@ -35,9 +35,9 @@ else {
 app.use('/api/v1', middlewares.jsonApi);
 app.use('/api/v1', router);
 
-eventHub.on('store.ready', () => {
+eventHub.on('store.ready', models => {
   // app.listen(port);
-  console.log('yo');  
+  console.log('yo', models);
 })
 
 module.exports = app;
