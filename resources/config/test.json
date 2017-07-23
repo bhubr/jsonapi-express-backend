@@ -1,0 +1,24 @@
+{
+  "db": {
+    "user": "root",
+    "password": "JkFFAFjAW6HH5NQr",
+    "database": "jsonapi_express_backend_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "keys": {
+    "private": "keys/private.key",
+    "public": "keys/public.key"
+  },
+  "email": {
+    "adminEmail": "johndoe@example.com",
+    "mailgunLogin": "YOUR.MAILGUN.LOGIN",
+    "mailgunPass": "YOUR.MAILGUN.PASS"
+  },
+  "permissions": {
+    "enabled": true,
+    "defaultUserRole": "User"
+  },
+  "port": 3333,
+  "whitelistedUrls": ["GET /api/v1/users*"]
+}
