@@ -27,7 +27,7 @@ function jsonapi() {
   }                 = model;
   const middleware  = require('./lib/middleware/index')(descriptors);
   const storeSqlStrategy = require('./lib/model/storeSqlStrategy')(descriptors, modelRelationships, query);
-  storeSqlStrategy.init();
+  // storeSqlStrategy.init();
   store = Object.assign(store, storeSqlStrategy);
   console.log(store);
   const { generateJwt, checkJwt, checkJwtMiddleware } = require('./lib/authToken')(appRootDir, config);
