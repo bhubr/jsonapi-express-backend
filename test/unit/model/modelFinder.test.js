@@ -21,13 +21,21 @@ describe('model finder', () => {
   });
 
   it('finds two models in models folder', done => {
-    const models = modelFinder.findInDir(__dirname + '/_resources/models');
+    const models = modelFinder.findInDir(__dirname + '/_resources/models', {
+      transforms: {
+        tablePrefix: 'test',
+        case: {
+          tables: 'lcamel',
+          columns: 'snake'
+        }
+      }
+    });
     const expected = {
       foo: {
         _name: 'foo',
-        meta: {
-          _primaryKey: 'ID'
-        },
+        _primaryKey: 'ID',
+        _tableName: 'testFoos',
+        _timestamps: true,
         attributes: {
           foo: {
             required: false,
@@ -47,9 +55,9 @@ describe('model finder', () => {
       },
       bar: {
         _name: 'bar',
-        meta: {
-          _primaryKey: 'ID'
-        },
+        _primaryKey: 'ID',
+        _tableName: 'testBars',
+        _timestamps: true,
         attributes: {
           bar: {
             required: false,
@@ -69,9 +77,9 @@ describe('model finder', () => {
       },
       dummyModel: {
         _name: 'dummyModel',
-        meta: {
-          _tableName: 'dummy_models'
-        },
+        _primaryKey: 'id',
+        _tableName: 'testDummies',
+        _timestamps: true,
         attributes: {
           dummy: {
             required: true,
