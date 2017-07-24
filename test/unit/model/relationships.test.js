@@ -26,7 +26,7 @@ setupExtract.setStore(fakeStore());
 describe('relationships', () => {
 
   it('finds relationships in simple models', done => {
-    const models = modelFinder.findInDir(__dirname + '/_resources/models');
+    const models = modelFinder(__dirname + '/_resources/models');
     setup(models);
     // console.log(models);
     let relationships = {};
@@ -55,7 +55,7 @@ describe('relationships', () => {
   });
 
   it('finds one-to-one in user models and fakes failure because of no isOwner', done => {
-    const models = modelFinder.findInDir(__dirname + '/_resources/modelsUser');
+    const models = modelFinder(__dirname + '/_resources/modelsUser');
     models.user._relationships.passport.isOwner = false;
     try {
       setup(models);
@@ -67,7 +67,7 @@ describe('relationships', () => {
   });
 
   it('finds one-to-one in user models and fakes failure because of both isOwner', done => {
-    const models = modelFinder.findInDir(__dirname + '/_resources/modelsUser')
+    const models = modelFinder(__dirname + '/_resources/modelsUser')
     models.passport._relationships.owner.isOwner = true;
     try {
       setup(models);

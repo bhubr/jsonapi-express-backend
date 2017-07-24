@@ -6,7 +6,7 @@ describe('model finder', () => {
 
   it('tries to find models in non-existing folder', done => {
     try {
-      const models = modelFinder.findInDir(__dirname + '/wrongpath');
+      const models = modelFinder(__dirname + '/wrongpath');
     } catch(err) {
       assert.equal(err.message, 'Could not find models folder: ' + __dirname + '/wrongpath');
       return done();
@@ -15,13 +15,13 @@ describe('model finder', () => {
   });
 
   it('finds no models in empty models folder', done => {
-    const models = modelFinder.findInDir(__dirname + '/_resources/modelsEmpty');
+    const models = modelFinder(__dirname + '/_resources/modelsEmpty');
     assert.deepEqual(models, {}, 'returned models should be an empty object');
     done();
   });
 
   it('finds two models in models folder', done => {
-    const models = modelFinder.findInDir(__dirname + '/_resources/models', {
+    const models = modelFinder(__dirname + '/_resources/models', {
       transforms: {
         tablePrefix: 'test',
         case: {
