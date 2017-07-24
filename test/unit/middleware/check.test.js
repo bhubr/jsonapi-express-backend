@@ -18,7 +18,6 @@ function getReqAndRes(method, url, params, body) {
 
 describe('pre-check middlewares', () => {
 
-
   describe('checks payload format: check.payloadAttributes', () => {
 
     it('empty body', done => {
@@ -106,6 +105,27 @@ describe('pre-check middlewares', () => {
         done();
       });
     });
+
+  });
+
+  describe('checks that model provided in URL exists', done => {
+
+    it('model does not exists', () => {
+      const { req, res } = getReqAndRes(
+        'POST', '/api/v1/unknown-models', { kebabPlural: 'unknown-models' }, { data: {
+          type: 'unknown-models'
+        } }
+      );
+      checkMws.existingModel(_req, _res, err => {
+        assert.equal(err.name, 'PayloadFormatError', 'error type should be `PayloadFormatError`');
+        assert.equal(
+          err.message,
+          'Type in payload: `smart-models` does not match type in URL: `dummy-models`'
+        );
+        done();
+      });
+    });
+
 
   });
 
