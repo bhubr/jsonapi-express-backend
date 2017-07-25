@@ -18,6 +18,9 @@ let modelDescriptors;
  *   b) based on relationship type
  *      (e.g. reject if an array is provided for a one-to-one relationship&vice-versa)
  *   c) also check content of item ({type, id}) or item array ([{type, id}, ...]) HERE??
+ *   d) some relationships HAVE to be there on POST:
+ *       - many-to-one, e.g. create a post comment => needs post id
+ *       - one-to-one when created resource is not owner, e.g. create a passport => needs user id
  *
  * NOT resolved yet:
  *  - unmap attributes (kebab-case => lowerCamel) BEFORE this? so that we don't need to do it twice
