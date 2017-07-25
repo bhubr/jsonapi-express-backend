@@ -2,14 +2,15 @@ const chai        = require('chai');
 const should      = chai.should();
 const assert      = chai.assert;
 const appRootDir  = require('app-root-dir').get();
-const modelFinder = require(appRootDir + '/lib/model/modelFinder');
-const models      = modelFinder(appRootDir + '/test/unit/model/_resources/models')
-const checkModelExists    = require(appRootDir + '/lib/middleware/checkModelExists')(models);
-const mockRequestAndResponse = require('../../tools/mockRequestAndResponse');
+
+const modelFinder            = require(appRootDir + '/lib/model/modelFinder');
+const models                 = modelFinder(appRootDir + '/test/unit/model/_resources/models')
+const checkModelExists       = require(appRootDir + '/lib/middleware/checkModelExists')(models);
+const mockRequestAndResponse = require(appRootDir + '/test/tools/mockRequestAndResponse');
 
 describe('checks model existence: checkModelExists', done => {
 
-  it('model does not exists', done => {
+  it('model does not exist', done => {
     const { req, res } = mockRequestAndResponse(
       'POST', '/api/v1/unknown-models', { kebabPlural: 'unknown-models' }, { data: {
         type: 'unknown-models'
@@ -26,3 +27,4 @@ describe('checks model existence: checkModelExists', done => {
   });
 
 });
+

@@ -12,12 +12,25 @@ winston.level = 'info';
 
 Promise.promisifyAll(fs);
 
+const defaultConfig = {
+  db: {
+    transforms: {
+      tablePrefix: '',
+      pluralize: true,
+      case: {
+        tables: 'lcamel',
+        fields: 'lcamel'
+      }
+    }
+  }
+};
+
 function jsonapi() {
   const appRootDir  = require('app-root-dir').get();
   const configDir   = appRootDir + '/' + ('config' || process.env.JSONAPI_EXB_CONFIGDIR);
   const modelsDir   = appRootDir + '/' + ('models' || process.env.JSONAPI_EXB_MODELSDIR);
   const mode        = process.env.NODE_ENV || 'development';
-  const config      = require(configDir + '/' + mode);
+  const config      = extend(true, defaultConfig, require(configDir + '/' + mode));
   const { query }   = require('jsonapi-express-backend-query')(config.db);
   const model       = require('./lib/model/index')(modelsDir, config);
   let {
@@ -25,7 +38,7 @@ function jsonapi() {
     descriptors,
     modelRelationships
   }                 = model;
-  const middleware  = require('./lib/middleware/index')(store);
+  const middleware  = require('./lib/middleware/index')(store, config);
   const storeSqlStrategy = require('./lib/model/storeSqlStrategy')(descriptors, modelRelationships, query);
   // storeSqlStrategy.init();
   store = Object.assign(store, storeSqlStrategy);
@@ -59,7 +72,7 @@ function legacy(baseDir, config, modelDescriptors) {
   const storeSqlStrategy = require('./lib/model/storeSqlStrategy')(modelDescriptors, model.relationships, query);
   model.store.setStrategy(storeSqlStrategy);
 
-  const middleware = require('./lib/middleware/index')(modelDescriptors);
+  const middleware = require('./lib/middleware/index')(modelDescriptors, config);
   const { generateJwt, checkJwt, checkJwtMiddleware } = require('./lib/authToken')(baseDir, config);
   const { router, middlewares, queryAsync } = require('./lib/jsonapi')(config, generateJwt, checkJwtMiddleware, model, query, middleware);
   const queryBuilder = require('./lib/queryBuilder');

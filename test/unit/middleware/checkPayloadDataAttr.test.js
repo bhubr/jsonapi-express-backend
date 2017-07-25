@@ -1,8 +1,11 @@
 const chai        = require('chai');
 const should      = chai.should();
 const assert      = chai.assert;
+const _           = require('lodash');
 const appRootDir  = require('app-root-dir').get();
-const checkPayloadDataAttr    = require(appRootDir + '/lib/middleware/checkPayloadDataAttr');
+
+const checkPayloadDataAttr   = require(appRootDir + '/lib/middleware/checkPayloadDataAttr');
+const { REQ_DATA_KEY }       = require(appRootDir + '/lib/constants');
 const mockRequestAndResponse = require('../../tools/mockRequestAndResponse');
 
 describe('checks payload format: checkPayloadDataAttr', () => {
@@ -127,6 +130,7 @@ describe('checks payload format: checkPayloadDataAttr', () => {
     );
     checkPayloadDataAttr(req, res, err => {
       assert.equal(err, undefined);
+      assert.ok(_.isPlainObject(req[REQ_DATA_KEY]), 'req.' + REQ_DATA_KEY + ' should be initialized');
       done();
     });
   });
@@ -139,6 +143,7 @@ describe('checks payload format: checkPayloadDataAttr', () => {
     );
     checkPayloadDataAttr(req, res, err => {
       assert.equal(err, undefined);
+      assert.ok(_.isPlainObject(req[REQ_DATA_KEY]), 'req.' + REQ_DATA_KEY + ' should be initialized');
       done();
     });
   });

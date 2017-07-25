@@ -23,7 +23,7 @@ let modelDescriptors;
  *       - one-to-one when created resource is not owner, e.g. create a passport => needs user id
  *
  * NOT resolved yet:
- *  - unmap attributes (kebab-case => lowerCamel) BEFORE this? so that we don't need to do it twice
+ *  - convert attributes (kebab-case => lowerCamel) BEFORE this? YES, DEFINITELY!
  *  - Do 4b and 4c here? MAYBE just 4b.
  */
 
