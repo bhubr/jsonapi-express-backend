@@ -36,9 +36,11 @@ describe('model finder', () => {
         _primaryKey: 'ID',
         _tableName: 'testFoos',
         _timestamps: true,
+        _requiredAttrs: [],
         attributes: {
           foo: {
             required: false,
+            unique: false,
             validator: null,
             readable: true,
             writable: true,
@@ -58,9 +60,11 @@ describe('model finder', () => {
         _primaryKey: 'ID',
         _tableName: 'testBars',
         _timestamps: true,
+        _requiredAttrs: [],
         attributes: {
           bar: {
             required: false,
+            unique: true,
             validator: null,
             readable: false,
             writable: false,
@@ -80,9 +84,11 @@ describe('model finder', () => {
         _primaryKey: 'id',
         _tableName: 'testDummies',
         _timestamps: true,
+        _requiredAttrs: ['dummy'],
         attributes: {
           dummy: {
             required: true,
+            unique: false,
             validator: null,
             readable: true,
             writable: true,

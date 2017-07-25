@@ -25,7 +25,7 @@ function jsonapi() {
     descriptors,
     modelRelationships
   }                 = model;
-  const middleware  = require('./lib/middleware/index')(descriptors);
+  const middleware  = require('./lib/middleware/index')(store);
   const storeSqlStrategy = require('./lib/model/storeSqlStrategy')(descriptors, modelRelationships, query);
   // storeSqlStrategy.init();
   store = Object.assign(store, storeSqlStrategy);
