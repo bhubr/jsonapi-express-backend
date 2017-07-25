@@ -155,6 +155,7 @@ const fakers = {
         type: 'users',
         attributes: {
           email: chance.email(),
+          username: chance.word({syllables: 3}),
           password: 'foobar'
         },
         relationships: {}

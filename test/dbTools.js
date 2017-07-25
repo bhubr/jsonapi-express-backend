@@ -1,3 +1,4 @@
+const lineLogger = require('console-line-logger');
 const path       = require('path');
 const mysql      = require('mysql');
 const Promise    = require('bluebird');
@@ -32,7 +33,7 @@ function createAdmin() {
     email: chance.email(),
     password: 'foobar'
   };
-  console.log(attrs);
+  lineLogger(attrs);
   return hashPasswordAsync(attrs.password)
   // .then(utils.passLog('hashed passwd'))
   .then(hash => queryBuilder.insert('users', {
@@ -46,7 +47,7 @@ function createAdmin() {
 //   var query = queryBuilder.insert('invitation_codes', { code });
 //   queryAsync(query)
 //   .then(res => {
-//     console.log('query succeeded!', res);
+//     lineLogger('query succeeded!', res);
 //     process.exit();
 //   })
 //   .catch(err => {

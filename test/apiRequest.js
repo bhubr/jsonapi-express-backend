@@ -13,8 +13,8 @@ module.exports = function(app) {
       return Promise.reject(new Error('Unknown method ' + method));
     }
     let headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/vnd.api+json',
+      'Content-Type': 'application/vnd.api+json'
     };
     if(jwt) {
       headers.Authorization = 'Bearer ' + jwt

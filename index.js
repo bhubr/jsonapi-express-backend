@@ -4,11 +4,13 @@
 
 // Future versions will be just like:
 // var jsonapi = require('jsonapi-express-backend');
-const extend  = require('xtend');
-const fs      = require('fs');
-const Promise = require('bluebird');
-const winston = require('winston');
-winston.level = 'info';
+const extend     = require('extend');
+const deepExtend = require('deep-extend');
+const fs         = require('fs');
+const Promise    = require('bluebird');
+const winston    = require('winston');
+const lineLogger = require('console-line-logger');
+winston.level    = 'info';
 
 Promise.promisifyAll(fs);
 
@@ -30,7 +32,9 @@ function jsonapi() {
   const configDir   = appRootDir + '/' + ('config' || process.env.JSONAPI_EXB_CONFIGDIR);
   const modelsDir   = appRootDir + '/' + ('models' || process.env.JSONAPI_EXB_MODELSDIR);
   const mode        = process.env.NODE_ENV || 'development';
-  const config      = extend(true, defaultConfig, require(configDir + '/' + mode));
+  const config = defaultConfig
+  deepExtend(config, require(configDir + '/' + mode));
+  // lineLogger(config)
   const { query }   = require('jsonapi-express-backend-query')(config.db);
   const model       = require('./lib/model/index')(modelsDir, config);
   let {
@@ -42,9 +46,10 @@ function jsonapi() {
   const storeSqlStrategy = require('./lib/model/storeSqlStrategy')(descriptors, modelRelationships, query);
   // storeSqlStrategy.init();
   store = Object.assign(store, storeSqlStrategy);
-  console.log(store);
+  // lineLogger(store);
   const { generateJwt, checkJwt, checkJwtMiddleware } = require('./lib/authToken')(appRootDir, config);
   const { router, middlewares, queryAsync } = require('./lib/jsonapi')(config, generateJwt, checkJwtMiddleware, model, query, middleware);
+  // lineLogger(generateJwt, checkJwt, checkJwtMiddleware, middlewares);
   let jsonapi = {
     config,
     query,
@@ -61,6 +66,7 @@ function jsonapi() {
     middlewares,
     queryAsync
   };
+  // lineLogger('middlewares', middlewares)
   return jsonapi;
 }
 
@@ -81,4 +87,5 @@ function legacy(baseDir, config, modelDescriptors) {
   return { model, router, middlewares, queryBuilder, utils, checkJwt, queryAsync: query };
 }
 
-module.exports = extend(legacy, jsonapi());
+// module.exports = deepExtend(legacy, jsonapi());
+module.exports = jsonapi;

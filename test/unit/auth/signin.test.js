@@ -1,3 +1,4 @@
+const lineLogger = require('console-line-logger');
 const chai       = require('chai');
 const assert     = chai.assert;
 const bcrypt     = require('bcrypt');
@@ -76,7 +77,7 @@ describe('user sign in', () => {
     it('unkwown email', () =>
       findAndMatchPassword(store, 'fooz@example.com', 'Foo#App1')
       .then(result => {
-        console.log('result', result);
+        lineLogger('result', result);
         throw new Error('then called when catch was expected');
       })
       .catch(err => {

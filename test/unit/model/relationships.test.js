@@ -1,3 +1,4 @@
+const lineLogger = require('console-line-logger');
 const chai          = require('chai');
 const assert        = chai.assert;
 const rewire        = require('rewire');
@@ -15,7 +16,7 @@ function fakeStore() {
   };
   return {
     findRecord: function(model, id) {
-      // console.log(model, id, _.find(models[model], { id }));
+      // lineLogger(model, id, _.find(models[model], { id }));
       return Promise.resolve(_.find(models[model], { id }));
     }
   }  
@@ -28,7 +29,7 @@ describe('relationships', () => {
   it('finds relationships in simple models', done => {
     const models = modelFinder(__dirname + '/_resources/models');
     setup(models);
-    // console.log(models);
+    // lineLogger(models);
     let relationships = {};
     _.forOwn(models, (model, key) => {
       relationships[key] = model.relationships;
@@ -80,7 +81,7 @@ describe('relationships', () => {
 
   it('extract function for belongsTo/belongsTo should fail if relatee not found', () => {
     const func = extractBelongsToBelongsTo({ relatedModel: 'passport', isOwner: true }, { relatedModel: 'user' });
-    // console.log(func.toString())
+    // lineLogger(func.toString())
     const payload = { type: 'passports', id: 3 };
     func(payload)
     .catch(err => {
@@ -92,7 +93,7 @@ describe('relationships', () => {
   // 
   it('sets up extract function for belongsTo/belongsTo', () => {
     const func = extractBelongsToBelongsTo({ relatedModel: 'passport', isOwner: true }, { relatedModel: 'user', column: 'ownerId' });
-    // console.log(func.toString())
+    // lineLogger(func.toString())
     const payload = { type: 'passports', id: 20 };
     func(payload);
   });

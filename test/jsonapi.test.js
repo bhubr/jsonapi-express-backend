@@ -1,3 +1,4 @@
+const lineLogger = require('console-line-logger');
 const chai = require('chai');
 const httpMocks = require('node-mocks-http');
 const should = chai.should();
@@ -29,7 +30,7 @@ describe('JSON API requests', () => {
     const payload = fakers.getUserPayload();
     const { email } = payload.attributes;
     return api.post('/api/v1/users', payload)
-    // .then(res => { console.log(res.body) })
+    // .then(res => { lineLogger(res.body) })
     .expect(200)
     .then(res => {
       const { data } = res.body;
@@ -70,13 +71,13 @@ describe('JSON API requests', () => {
     .then(data => {
       userId = data.userId;
       email = 'm.em' + ts() + '@example.com';
-      // console.log('## created user', userId);
+      // lineLogger('## created user', userId);
       return api.put(
         '/api/v1/users/' + data.userId,
         { id: data.userId, type: 'users', attributes: { email } },
         data.jwt
       )
-      // .then(res => { console.log('## expect err', res.body) })
+      // .then(res => { lineLogger('## expect err', res.body) })
       .expect(200);
     })
     .then(() => api.get('/api/v1/users/' + userId)
@@ -114,7 +115,7 @@ describe('JSON API requests', () => {
     //   '/api/v1/users/' + user.userId,
     //   admin.jwt
     // ))
-    // .then(res => { console.log(res.body) });
+    // .then(res => { lineLogger(res.body) });
   });
 
 
@@ -192,7 +193,7 @@ describe('JSON API requests', () => {
     .then(results => _.map(results, 'body.data'))
     .then(datas => {
       comments1ids = _.map(datas, 'id');
-      // console.log(comments1ids);
+      // lineLogger(comments1ids);
       datas.forEach((data, index) => {
         const relData = data.relationships.post.data;
         expect(Number.isInteger(data.id)).to.be.true;
@@ -217,7 +218,7 @@ describe('JSON API requests', () => {
     .then(results => _.map(results, 'body.data'))
     .then(datas => {
       tags1ids = _.map(datas, 'id');
-      // console.log('#tag1ids (linked to post 1)', tags1ids);
+      // lineLogger('#tag1ids (linked to post 1)', tags1ids);
       datas.forEach((data, index) => {
         expect(Number.isInteger(data.id)).to.be.true;
         expect(data.type).to.equal('tags');
@@ -315,11 +316,11 @@ describe('JSON API requests', () => {
     .set('updatedPostMeta')
     .get(({ updatedPostMeta, post2id }) => {
       const { id, type, attributes, relationships } = updatedPostMeta;
-      // console.log(id, type, attributes, relationships);
+      // lineLogger(id, type, attributes, relationships);
       expect(id).to.equal(postMetaId);
       expect(type).to.equal('post-metas');
       expect(JSON.parse(attributes['meta-value'])).to.deep.equal({ some: 'data', foo: 'bar'});
-      // console.log(attributes, relationships);
+      // lineLogger(attributes, relationships);
       expect(relationships.post.data.type).to.equal('posts');
       // expect(parseInt(relationships.post.data.id)).to.equal(post2id);
     })
@@ -327,13 +328,13 @@ describe('JSON API requests', () => {
     .then(res => (res.body.data))
     .set('updatedPostMeta')
     .get(({ updatedPostMeta, post2id }) => {
-      // console.log(updatedPostMeta)
+      // lineLogger(updatedPostMeta)
       const { id, type, attributes, relationships } = updatedPostMeta;
-      // console.log(id, type, attributes, relationships);
+      // lineLogger(id, type, attributes, relationships);
       expect(id).to.equal(postMetaId);
       expect(type).to.equal('post-metas');
       expect(JSON.parse(attributes['meta-value'])).to.deep.equal({ some: 'data', foo: 'bar' });
-      // console.log(attributes, relationships);
+      // lineLogger(attributes, relationships);
       expect(relationships.post.data.type).to.equal('posts');
       expect(parseInt(relationships.post.data.id)).to.equal(post2id);
     })
@@ -341,9 +342,9 @@ describe('JSON API requests', () => {
     .then(res => (res.body.data))
     // .set('updatedPostMeta')
     .then(data => {
-      // console.log(data)
+      // lineLogger(data)
       const { id, type, attributes, relationships } = data;
-      // console.log(id, type, attributes, relationships);
+      // lineLogger(id, type, attributes, relationships);
       expect(id).to.equal(comments1ids[0]);
       expect(type).to.equal('post-comments');
       expect(attributes['comment-text']).to.equal('Lorem ipsum blah blah');
@@ -355,9 +356,9 @@ describe('JSON API requests', () => {
     .then(res => (res.body.data))
     // .set('updatedPostMeta')
     .then(data => {
-      // console.log(data)
+      // lineLogger(data)
       const { id, type, attributes, relationships } = data;
-      // console.log(id, type, attributes, relationships);
+      // lineLogger(id, type, attributes, relationships);
       expect(id).to.equal(userId2);
       expect(type).to.equal('users');
       expect(relationships.posts.data.length).to.equal(1);
@@ -384,19 +385,19 @@ describe('JSON API requests', () => {
       datas.forEach( (data, index) => {
         const expectedPostIds = allExpectedPostIds[index];
         const { id, type, attributes, relationships } = data;
-        // console.log(id, type, attributes, relationships);
+        // lineLogger(id, type, attributes, relationships);
         expect(relationships.posts.data.length).to.equal(expectedPostIds.length);
         const postIds = _.map(relationships.posts.data, p => parseInt(p.id));
         expect(postIds).to.deep.equal(expectedPostIds);
       } );
     })
     // .get(({ credentials2 }) => api.)
-    // .then(console.log)
+    // .then(lineLogger)
     // .then(([admin, user]) => api['delete'](
     //   '/api/v1/users/' + user.userId,
     //   admin.jwt
     // ))
-    // .then(res => { console.log(res.body) });
+    // .then(res => { lineLogger(res.body) });
   });
 
   it('creates a user, then an extended profile', () => {
@@ -406,14 +407,14 @@ describe('JSON API requests', () => {
     .set('payload')
     .get(({ credentials, payload}) =>
       api.post('/api/v1/extended-profiles', payload, credentials.jwt)
-      // .then(res => { console.log(res.body) })
+      // .then(res => { lineLogger(res.body) })
       .expect(200)
     )
     // .then(([admin, user]) => api['delete'](
     //   '/api/v1/users/' + user.userId,
     //   admin.jwt
     // ))
-    // .then(res => { console.log(res.body) });
+    // .then(res => { lineLogger(res.body) });
   });
 
 

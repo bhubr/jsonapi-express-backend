@@ -1,3 +1,4 @@
+const lineLogger = require('console-line-logger');
 const utils = require('../lib/utils');
 const naming = require('../lib/naming');
 const path = require('path');
@@ -33,7 +34,7 @@ function createPostWithRelatees() {
     const postComments = fakers.postComments(_post.id, 3);
     const postMeta = fakers.postMeta(_post.id);
     const tags = fakers.tags(4);
-    // console.log(postComments, postMeta, tags);
+    // lineLogger(postComments, postMeta, tags);
     return Promise.all([
       store.createRecord('postMeta', postMeta),
       Promise.map(postComments, postComment =>
@@ -45,7 +46,7 @@ function createPostWithRelatees() {
     ]);
   })
   .then(([postMeta, comments, tags]) => {
-    // console.log(postMeta);
+    // lineLogger(postMeta);
     return {
       metaId: postMeta.id,
       tagIds: tags.map(tag => (tag.id))
@@ -91,7 +92,7 @@ describe('Test store SQL strategy', () => {
     .then(utils.passLog('relatees'))
     .then(() => done())
     .catch(err => {
-      console.log('## err', err);
+      lineLogger('## err', err);
       throw err;
     });
   });
@@ -100,7 +101,7 @@ describe('Test store SQL strategy', () => {
     createPostWithRelatees()
     .then(utils.passLog('post and relatees'))
     .catch(err => {
-      console.log('## err', err);
+      lineLogger('## err', err);
       throw err;
     })
   );
@@ -116,9 +117,9 @@ describe('Test store SQL strategy', () => {
     // .then(utils.passLog('posts only'))
     .then(posts => store.findAllRelateesMulti('post', posts))
     .then(utils.passLog('posts with relatees'))
-    .then(records => { console.log(_.map(records, '_rel')); })
+    .then(records => { lineLogger(_.map(records, '_rel')); })
     .catch(err => {
-      console.log('## err', err);
+      lineLogger('## err', err);
       throw err;
     })
   );
@@ -139,7 +140,7 @@ describe('Test store SQL strategy', () => {
       });
       const promises = [];
       userPosts.forEach(posts => {
-        // console.log(posts);
+        // lineLogger(posts);
         promises.push(Promise.map(posts, post => 
           store.createRecord('post', post)
         ));

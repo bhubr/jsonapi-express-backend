@@ -1,3 +1,4 @@
+const lineLogger = require('console-line-logger');
 const chai = require('chai');
 const httpMocks = require('node-mocks-http');
 const should = chai.should();
@@ -31,12 +32,12 @@ describe('JSON API requests', () => {
     const payload = fakers.getUserPayload();
     const { email } = payload.attributes;
     return api.post('/api/v1/users', payload)
-    // .then(res => { console.log(res.status) })
+    // .then(res => { lineLogger(res.status) })
     .expect(200)
     .then(res => {
       const { data } = res.body;
       const { id, type, attributes } = data;
-      console.log(id);
+      lineLogger(id);
       newUserId = id;
       expect(data).to.not.be.undefined;
       expect(attributes).to.not.be.undefined;
@@ -48,12 +49,12 @@ describe('JSON API requests', () => {
 
   
   it('updates a non-existent user', () => {
-    console.log('newUserId');
+    lineLogger('newUserId');
     const payload = fakers.getUserPayload();
     const { email } = payload.attributes;
     return api.signupAndLogin()
     .then(data => {
-      console.log('\n\n\n################', '/api/v1/users/' + 666666);
+      lineLogger('\n\n\n################', '/api/v1/users/' + 666666);
       return data;
     })
     .then(({ userId, jwt }) => api.put(
@@ -62,11 +63,11 @@ describe('JSON API requests', () => {
         jwt
       )
     )
-    // .then(res => { console.log(res) })
+    // .then(res => { lineLogger(res) })
     // .expect(200)
     .then(res => {
       expect(res.status).to.equal(404);
-      console.log(res.body)
+      lineLogger(res.body)
       // const { data } = res.body;
       // const { id, type, attributes } = data;
       // expect(data).to.not.be.undefined;

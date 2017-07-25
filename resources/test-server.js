@@ -7,7 +7,7 @@ const configs    = require(__dirname + '/config.json');
 const env        = process.env.NODE_ENV ? process.env.NODE_ENV : 'test';
 const config     = configs[env];
 const models     = require('./models');
-const { model, router, middlewares, queryBuilder, queryAsync, eventHub } = require('../index');
+const { model, router, middlewares, queryBuilder, queryAsync, eventHub } = require('../index')();
 const winston    = require('winston');
 const port = config.port || 3333;
 
