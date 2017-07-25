@@ -150,12 +150,13 @@ describe('JSON API requests', () => {
     .catch(done);
   });
 
-  it.skip('creates a user', () => {
+  it('creates a user', () => {
     const payload = fakers.getUserPayload();
     const { email } = payload.attributes;
-    return api.signupAndLogin()
-    .then(({ userId, jwt }) => {
-      userJwt = jwt;
+    return api.post('/api/v1/users', payload)
+    // .expect(404)
+    .then(res => {
+      console.log(res.status, res.body);
     });
   });
 
