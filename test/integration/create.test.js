@@ -20,6 +20,8 @@ function ts() {
 }
 
 describe('JSON API requests', () => {
+  let userCredentials;
+  let userId;
   let userJwt;
 
   // http://stackoverflow.com/questions/18654563/running-a-set-of-actions-before-every-test-file-in-mocha
@@ -152,11 +154,52 @@ describe('JSON API requests', () => {
 
   it('creates a user', () => {
     const payload = fakers.getUserPayload();
-    const { email } = payload.attributes;
+    userCredentials = payload.attributes;
+
     return api.post('/api/v1/users', payload)
-    // .expect(404)
+    .expect(200)
     .then(res => {
-      console.log(res.status, res.body);
+      userId = res.body.data.id;
+      const attributes = utils.lowerCamelKeys(res.body.data.attributes);
+      const { relationships } = res.body.data;
+      assert.equal(attributes.email, payload.attributes.email);
+      assert.equal(attributes.username, payload.attributes.username);
+      assert.deepEqual(relationships, {});
+      // lineLogger('## user created!!', res.status, userId, attributes, relationships);
+
+    });
+  });
+
+  it('signs in with created user', () => {
+    const { email, password } = userCredentials;
+    // lineLogger('userCredentials', userCredentials);
+    return request(app).post('/api/v1/signin')
+    .set({
+      'Accept': 'application/vnd.api+json',
+      'Content-Type': 'application/vnd.api+json'
+    })
+    .send({ email, password })
+    .expect(200)
+    .then(res => {
+      lineLogger('## user signed in!!', res.status, res.body);
+      ({ data } = res.body);
+      assert.equal(data.userId, userId);
+      userJwt = data.jwt;
+    });
+  });
+
+  it('tries and create extended profile, but provides no user id', () => {
+    const payload = {
+      type: 'extended-profiles',
+      attributes: {
+        phone: '+33-6-61-51-41-31',
+        facebookUrl: 'https://facebook.com/' + userCredentials.username
+      }
+    };
+    return api.post('/api/v1/extended-profiles', payload)
+    .expect(400)
+    .then(res => {
+      lineLogger('## response to POST /extended-profiles', res.status, res.body);
     });
   });
 

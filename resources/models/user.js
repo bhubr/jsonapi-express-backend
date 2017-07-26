@@ -4,8 +4,9 @@ module.exports = function(store) {
     email: store.attr('string'),
     username: store.attr('string', { forbiddenAttr: 'VALUE', required: true }),
     password: store.attr('string'),
-    ownedGroups: store.hasMany('group', { inverse: 'owner' }),
-    groups: store.hasMany('group', { inverse: 'users' }),
-    dummyModels: store.hasMany('dummyModel')
+    extendedProfile: store.belongsTo('extendedProfile', { isOwner: true })
+    // ownedGroups: store.hasMany('group', { inverse: 'owner' }),
+    // groups: store.hasMany('group', { inverse: 'users' }),
+    // dummyModels: store.hasMany('dummyModel')
   }
 };
