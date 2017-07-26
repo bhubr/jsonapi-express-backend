@@ -16,15 +16,42 @@ Promise.promisifyAll(fs);
 
 const defaultConfig = {
   db: {
+    user: '',
+    password: '',
+    database: '',
+    host: '127.0.0.1',
+    dialect: 'mysql',
     transforms: {
       tablePrefix: '',
       pluralize: true,
       case: {
-        tables: 'lcamel',
-        fields: 'lcamel'
+        fields: 'lcamel',
+        tables: 'lcamel'
       }
     }
-  }
+  },
+  email: {
+    adminEmail: 'johndoe@example.com',
+    mailgunLogin: 'YOUR.MAILGUN.LOGIN',
+    mailgunPass: 'YOUR.MAILGUN.PASS'
+  },
+  security: {
+    auth: {
+      enabled: true,
+      passwordHash: 'bcrypt'
+    },
+    permissions: {
+      enabled: true,
+      defaultUserRole: 'User'
+    },
+    keys: {
+      private: 'keys/private.key',
+      public: 'keys/public.key'
+    },
+    whitelistedUrls: ["GET /api/v1/users*"],
+    unrestrictedGet: false
+  },
+  port: 3333
 };
 
 function jsonapi() {

@@ -14,22 +14,26 @@
       }
     }
   },
-  "keys": {
-    "private": "keys/private.key",
-    "public": "keys/public.key"
-  },
   "email": {
     "adminEmail": "johndoe@example.com",
     "mailgunLogin": "YOUR.MAILGUN.LOGIN",
     "mailgunPass": "YOUR.MAILGUN.PASS"
   },
-  "permissions": {
-    "enabled": false,
-    "defaultUserRole": "User"
-  },
-  "misc": {
+  "security": {
+    "auth": {
+      "enabled": true,
+      "passwordHash": "bcrypt"
+    },
+    "permissions": {
+      "enabled": true,
+      "defaultUserRole": "User"
+    },
+    "keys": {
+      "private": "keys/private.key",
+      "public": "keys/public.key"
+    },
+    "whitelistedUrls": ["GET /api/v1/users*"],
     "unrestrictedGet": false
   },
-  "port": 3333,
-  "whitelistedUrls": ["GET /api/v1/users*"]
+  "port": 3333
 }
