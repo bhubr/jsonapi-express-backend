@@ -4,7 +4,15 @@
     "password": "JkFFAFjAW6HH5NQr",
     "database": "jsonapi_express_backend_test",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "transforms": {
+      "tablePrefix": "",
+      "pluralize": true,
+      "case": {
+        "tables": "snake",
+        "fields": "lcamel"
+      }
+    }
   },
   "email": {
     "adminEmail": "johndoe@example.com",

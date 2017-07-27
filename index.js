@@ -59,9 +59,8 @@ function jsonapi() {
   const configDir   = appRootDir + '/' + ('config' || process.env.JSONAPI_EXB_CONFIGDIR);
   const modelsDir   = appRootDir + '/' + ('models' || process.env.JSONAPI_EXB_MODELSDIR);
   const mode        = process.env.NODE_ENV || 'development';
-  const config = defaultConfig
+  const config = defaultConfig;
   deepExtend(config, require(configDir + '/' + mode));
-  // lineLogger(config)
   const { query }   = require('jsonapi-express-backend-query')(config.db);
   const model       = require('./lib/model/index')(modelsDir, config);
   let {

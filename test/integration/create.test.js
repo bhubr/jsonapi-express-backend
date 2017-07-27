@@ -41,8 +41,9 @@ describe('JSON API requests', () => {
       'Content-Type': 'application/vnd.api+json'
     })
     .send(undefined)
-    .expect(400)
+    // .expect(400)
     .then(res => {
+      console.log(res.body);
       assert.equal(res.status, 400);
       assert.deepEqual(res.body, {
         error: '[PayloadFormatError] => payload body not found or empty'
@@ -136,17 +137,18 @@ describe('JSON API requests', () => {
 
   // 2nd step - does model exist?
 
-  it('attempts to create a non-existent model', done => {
+  it('attempts to create a non-existent model, fails because is guest', done => {
     api.post(
       '/api/v1/not-found-models',
       { type: 'not-found-models', attributes: { foo: 'bar' } },
       userJwt
     )
-    .expect(404)
+    .expect(401)
     .then(res => {
-      assert.deepEqual(res.body, {
-        error: '[UnknownModelError] => Model `notFoundModel` not found in model definitions (file `not-found-model.js`)'
-      });
+      assert.deepEqual(res.body, {});
+      // assert.deepEqual(res.body, {
+      //   error: '[UnknownModelError] => Model `notFoundModel` not found in model definitions (file `not-found-model.js`)'
+      // });
       done();
     })
     .catch(done);
@@ -188,6 +190,22 @@ describe('JSON API requests', () => {
     });
   });
 
+  it('attempts to create a non-existent model, fails with 404', done => {
+    api.post(
+      '/api/v1/not-found-models',
+      { type: 'not-found-models', attributes: { foo: 'bar' } },
+      userJwt
+    )
+    .expect(404)
+    .then(res => {
+      assert.deepEqual(res.body, {
+        error: '[UnknownModelError] => Model `notFoundModel` not found in model definitions (file `not-found-model.js`)'
+      });
+      done();
+    })
+    .catch(done);
+  });
+
   it('tries and create extended profile, but provides no user id', () => {
     const payload = {
       type: 'extended-profiles',
@@ -196,7 +214,7 @@ describe('JSON API requests', () => {
         facebookUrl: 'https://facebook.com/' + userCredentials.username
       }
     };
-    return api.post('/api/v1/extended-profiles', payload)
+    return api.post('/api/v1/extended-profiles', payload, userJwt)
     .expect(400)
     .then(res => {
       lineLogger('## response to POST /extended-profiles', res.status, res.body);

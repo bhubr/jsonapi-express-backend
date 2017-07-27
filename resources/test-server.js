@@ -18,22 +18,31 @@ process.on('uncaughtException', function (err) {
   console.log("Node NOT Exiting...");
 });
 
+
 /**
  * Setup Express
  */
 const app = express();
 // app.use(morgan('tiny'));
 app.use(express.static('public'));
-if(process.env.NODE_ENV === 'test') {
-  // console.log('use application/json');
-  app.use(bodyParser.json({ type: 'application/json' }));
-  app.use('/api/v1', middlewares.checkJwt);
-}
-else {
+// if(process.env.NODE_ENV === 'test') {
+//   // console.log('use application/json');
+//   // app.use(bodyParser.json({ type: 'application/json' }));
+//   app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+// }
+// else {
   app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
-}
+  app.use('/api/v1', middlewares.checkJwt);
+// }
 app.use('/api/v1', middlewares.jsonApi);
 app.use('/api/v1', router);
+
+app.use(function (err, req, res, next) {
+  if(err) {
+    console.log('### ERR', err);
+    return res.status(500, { err: err.message })
+  }
+});
 
 // eventHub.on('store.ready', models => {
 app.listen(port, () => {
