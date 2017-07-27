@@ -146,9 +146,6 @@ describe('JSON API requests', () => {
     .expect(401)
     .then(res => {
       assert.deepEqual(res.body, {});
-      // assert.deepEqual(res.body, {
-      //   error: '[UnknownModelError] => Model `notFoundModel` not found in model definitions (file `not-found-model.js`)'
-      // });
       done();
     })
     .catch(done);
@@ -217,7 +214,11 @@ describe('JSON API requests', () => {
     return api.post('/api/v1/extended-profiles', payload, userJwt)
     .expect(400)
     .then(res => {
-      lineLogger('## response to POST /extended-profiles', res.status, res.body);
+      // lineLogger('## response to POST /extended-profiles', res.status, res.body);
+      assert.deepEqual(res.body, {
+        error: '[MissingFieldError] => Required field `owner` not found in `relationships`'
+      });
+
     });
   });
 
