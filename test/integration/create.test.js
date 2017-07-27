@@ -203,20 +203,74 @@ describe('JSON API requests', () => {
     .catch(done);
   });
 
-  it('tries and create extended profile, but provides no user id', () => {
+  it('tries and create extended profile, but provides no `twitter-url`', () => {
     const payload = {
       type: 'extended-profiles',
       attributes: {
-        phone: '+33-6-61-51-41-31',
-        facebookUrl: 'https://facebook.com/' + userCredentials.username
+        phone: '+33-6-61-51-41-31'
+      },
+      relationships: {
+        owner: { data: { type: 'users', id: userId } }
       }
     };
     return api.post('/api/v1/extended-profiles', payload, userJwt)
     .expect(400)
     .then(res => {
-      // lineLogger('## response to POST /extended-profiles', res.status, res.body);
       assert.deepEqual(res.body, {
-        error: '[MissingFieldError] => Required field `owner` not found in `relationships`'
+        error: "[MissingFieldError] => Required attribute `extendedProfile.twitterUrl`: `twitter-url` not found in payload's `attributes`"
+      });
+
+    });
+  });
+
+  it('tries and create extended profile, but provides no owner (with user id)', () => {
+    const payload = {
+      type: 'extended-profiles',
+      attributes: {
+        phone: '+33-6-61-51-41-31',
+        'twitter-url': 'https://twitter.com/' + userCredentials.username
+      }
+    };
+    return api.post('/api/v1/extended-profiles', payload, userJwt)
+    .expect(400)
+    .then(res => {
+      assert.deepEqual(res.body, {
+        error: "[MissingFieldError] => Required relationship `extendedProfile.owner`: `owner` not found in payload's `relationships`"
+      });
+
+    });
+  });
+
+  it('tries and create extended profile with required attributes and relationships', () => {
+    const attributes = {
+      phone: '+33-6-61-51-41-31',
+      'twitter-url': 'https://twitter.com/' + userCredentials.username,
+      address: "77 Lannister Place, King's Landing",
+      'twitter-url': 'https://twitter.com/' + userCredentials.username,
+      'facebook-url': 'https://facebook.com/' + userCredentials.username,
+      'linkedin-url': 'https://linkedin.com/' + userCredentials.username
+    };
+    const payload = {
+      type: 'extended-profiles',
+      attributes,
+      relationships: {
+        owner: { data: { type: 'users', id: userId } }
+      }
+    };
+    return api.post('/api/v1/extended-profiles', payload, userJwt)
+    .expect(200)
+    .then(res => {
+      const { data } = res.body;
+      const { id } = data;
+      assert.deepEqual(data, {
+        type: 'extended-profiles',
+        id,
+        attributes: Object.assign(attributes, {
+          'created-at': null, 'updated-at': null
+        }),
+        relationships: {
+          owner: { data: { type: 'users', id: userId } }
+        }
       });
 
     });
